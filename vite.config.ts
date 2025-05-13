@@ -7,5 +7,14 @@ export default defineConfig({
   define: {
     // Asegurarse de que process.env está disponible en el cliente
     'process.env': {}
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })

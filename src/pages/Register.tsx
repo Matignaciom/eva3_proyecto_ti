@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './Register.module.css';
 
+interface Comunidad {
+  idComunidad: number;
+  nombre: string;
+}
+
 export default function Register() {
   const [nombreCompleto, setNombreCompleto] = useState('');
   const [email, setEmail] = useState('');
@@ -14,31 +19,73 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [comunidades, setComunidades] = useState<string[]>([]);
+  const [comunidades, setComunidades] = useState<Comunidad[]>([]);
+  const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [showStatusMessage, setShowStatusMessage] = useState(false);
   
   const navigate = useNavigate();
 
-  // Cargar comunidades desde el backend
+  // Función para verificar el estado del servidor y cargar comunidades
+  const checkServerAndLoadComunidades = async (showStatusMessage = false) => {
+    try {
+      setServerStatus('checking');
+      if (showStatusMessage) {
+        setShowStatusMessage(true);
+      }
+      
+      // Verificar si el servidor está en línea
+      const serverResponse = await fetch('/', {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000)
+      });
+      
+      if (serverResponse.ok) {
+        setServerStatus('online');
+        if (showStatusMessage) {
+          setShowStatusMessage(true);
+        }
+        
+        // Si el servidor está en línea, cargar las comunidades
+        const comunidadesResponse = await fetch('/api/comunidades');
+        
+        if (comunidadesResponse.ok) {
+          const data = await comunidadesResponse.json();
+          setComunidades(data.comunidades);
+        } else {
+          console.error('Error al cargar comunidades:', await comunidadesResponse.text());
+        }
+      } else {
+        setServerStatus('offline');
+        setShowStatusMessage(true); // Siempre mostrar en caso de error
+      }
+    } catch (error) {
+      console.error('Error al verificar servidor o cargar comunidades:', error);
+      setServerStatus('offline');
+      setShowStatusMessage(true); // Siempre mostrar en caso de error
+    }
+  };
+
+  // Verificar estado del servidor y cargar comunidades al iniciar
   useEffect(() => {
-    const fetchComunidades = async () => {
-      try {
-        // En una implementación real, esta llamada obtendría las comunidades del backend
-        // Por ahora, usamos datos estáticos
-        setComunidades([
-          "Comunidad Las Palmas",
-          "Edificio San Martín",
-          "Condominio Las Palmas",
-          "Residencial El Bosque",
-          "Condominio Vista Mar",
-          "Edificio Central"
-        ]);
-      } catch (error) {
-        console.error('Error al cargar comunidades:', error);
+    checkServerAndLoadComunidades(false); // No mostrar mensaje al cargar la página
+  }, []);
+  
+  // Efecto para ocultar la notificación de estado del servidor después de 3 segundos
+  useEffect(() => {
+    let timeoutId: number | undefined;
+    
+    if (showStatusMessage) {
+      timeoutId = window.setTimeout(() => {
+        setShowStatusMessage(false);
+      }, 3000); // El toast se oculta con animación después de 3s
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
-    
-    fetchComunidades();
-  }, []);
+  }, [showStatusMessage]);
 
   const roles = [
     "Administrador",
@@ -68,7 +115,7 @@ export default function Register() {
       setError('');
       
       // Realizar la solicitud al backend
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,13 +191,60 @@ export default function Register() {
       <div className={styles.logo}>
         <h1 className={styles.logoText}>SIGEPA</h1>
         <p className={styles.logoSubtitle}>Sistema de Gestión de Pagos</p>
+        
+        <button 
+          type="button" 
+          className={`${styles.refreshButton} ${serverStatus === 'checking' ? styles.refreshButtonSpinning : ''}`}
+          onClick={() => checkServerAndLoadComunidades(true)}
+          disabled={loading}
+          aria-label="Verificar conexión con el servidor"
+          title="Verificar estado del servidor"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 4v6h-6" />
+            <path d="M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+            <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          <span className={styles.refreshLabel}>Actualizar</span>
+        </button>
       </div>
       
       <h2 className={styles.title}>Registro de Usuario</h2>
       
+      {/* Notificación tipo Toast para el estado del servidor */}
+      {showStatusMessage && (
+        <div className={`${styles.serverToast} ${
+          serverStatus === 'online' 
+            ? styles.statusOnlineToast 
+            : serverStatus === 'offline' 
+              ? styles.statusOfflineToast 
+              : styles.statusCheckingToast
+        }`}>
+          {serverStatus === 'checking' && (
+            <>
+              <span className={`${styles.toastIcon} ${styles.spinnerIcon}`}>⟳</span> 
+              Verificando conexión al servidor...
+            </>
+          )}
+          {serverStatus === 'online' && (
+            <>
+              <span className={styles.toastIcon}>✅</span> 
+              Servidor conectado
+            </>
+          )}
+          {serverStatus === 'offline' && (
+            <>
+              <span className={styles.toastIcon}>❌</span> 
+              Servidor no disponible - Contacta al administrador
+            </>
+          )}
+        </div>
+      )}
+      
       {error && <div className={styles.error}>{error}</div>}
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={serverStatus === 'offline' ? styles.disabledForm : ''}>
         <div className={styles.formHeader}>
           <h2>Nombre Completo</h2>
           <div className={styles.inputGroup}>
@@ -160,7 +254,7 @@ export default function Register() {
               onChange={(e) => setNombreCompleto(e.target.value)}
               placeholder="Ej: Juan Pérez Rodríguez"
               required
-              disabled={loading}
+              disabled={loading || serverStatus === 'offline'}
             />
             <button type="button" className={styles.infoButton} title="Tu nombre y apellidos completos">
               <span>i</span>
@@ -177,7 +271,7 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ej: correo@gmail.com"
               required
-              disabled={loading}
+              disabled={loading || serverStatus === 'offline'}
             />
             <button type="button" className={styles.infoButton} title="Tu correo electrónico para iniciar sesión">
               <span>i</span>
@@ -195,7 +289,7 @@ export default function Register() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingresa tu contraseña"
                 required
-                disabled={loading}
+                disabled={loading || serverStatus === 'offline'}
               />
               <button 
                 type="button" 
@@ -230,7 +324,7 @@ export default function Register() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirma tu contraseña"
                 required
-                disabled={loading}
+                disabled={loading || serverStatus === 'offline'}
               />
               <button 
                 type="button" 
@@ -267,7 +361,7 @@ export default function Register() {
                 onChange={handleRutChange}
                 placeholder="Ej: 12.345.678-9"
                 required
-                disabled={loading}
+                disabled={loading || serverStatus === 'offline'}
               />
               <button type="button" className={styles.infoButton} title="Tu RUT con puntos y guión">
                 <span>i</span>
@@ -282,7 +376,7 @@ export default function Register() {
                 value={rol}
                 onChange={(e) => setRol(e.target.value)}
                 required
-                disabled={loading}
+                disabled={loading || serverStatus === 'offline'}
               >
                 <option value="" disabled>Selecciona un rol</option>
                 {roles.map((rolOption) => (
@@ -302,12 +396,14 @@ export default function Register() {
               value={comunidad}
               onChange={(e) => setComunidad(e.target.value)}
               required
-              disabled={loading}
+              disabled={loading || serverStatus === 'offline' || comunidades.length === 0}
             >
-              <option value="" disabled>Selecciona una comunidad</option>
+              <option value="" disabled>
+                {comunidades.length === 0 ? 'Cargando comunidades...' : 'Selecciona una comunidad'}
+              </option>
               {comunidades.map((comunidadOption) => (
-                <option key={comunidadOption} value={comunidadOption}>
-                  {comunidadOption}
+                <option key={comunidadOption.idComunidad} value={comunidadOption.nombre}>
+                  {comunidadOption.nombre}
                 </option>
               ))}
             </select>
@@ -318,7 +414,7 @@ export default function Register() {
           <button 
             type="submit" 
             className={styles.registerButton}
-            disabled={loading}
+            disabled={loading || serverStatus === 'offline'}
           >
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
