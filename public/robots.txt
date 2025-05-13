@@ -1,0 +1,6 @@
+# Permitir a todos los robots de motores de búsqueda acceder al sitio
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://sigepa.com/sitemap.xml 
