@@ -1,8 +1,43 @@
+# Configuración de construcción para el sitio web SIGEPA alojado en Netlify
 [build]
-  command = "npm run build"
-  publish = "dist"
+  command = "npm run build"    # Comando para construir la aplicación
+  publish = "dist"             # Directorio donde se encuentra el sitio compilado
+  environment = { NODE_VERSION = "20" }  # Versión de Node.js a usar
 
+# Variables de entorno para producción
+[context.production.environment]
+  VITE_APP_ENV = "production"
+
+# Variables de entorno para despliegues de ramas
+[context.branch-deploy.environment]
+  VITE_APP_ENV = "staging"
+
+# Variables de entorno para vistas previas
+[context.deploy-preview.environment]
+  VITE_APP_ENV = "preview"
+
+# Redirección para Single Page Application (SPA)
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+
+# Redirección para la API - Esta es la parte crucial para conectarse al backend
+# Necesitarás desplegar el backend en un servicio como Railway, Render, etc.
+[[redirects]]
+  from = "/api/*"
+  to = "https://api-sigepa.onrender.com/api/:splat"  # URL del backend deployado
+  status = 200
+  force = true
+  headers = { Access-Control-Allow-Origin = "https://sigepa.netlify.app" }
+
+# Opciones de seguridad recomendadas
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Política de seguridad actualizada con la URL del backend
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sigepa.netlify.app https://api-sigepa.onrender.com https://*.amazonaws.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" 

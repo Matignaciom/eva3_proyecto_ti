@@ -24,7 +24,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'sigepa_jwt_secret_key';
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // Permitir ambos orígenes
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://sigepa.netlify.app'], // Incluir dominio de Netlify
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
