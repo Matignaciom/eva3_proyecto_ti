@@ -1,40 +1,33 @@
-# Configuración básica
 [build]
   command = "npm run build"
   publish = "dist"
   environment = { NODE_VERSION = "20" }
 
-# Redirección SPA
+# Configuración para el entorno de producción
+[context.production.environment]
+  VITE_APP_ENV = "production"
+
+# Configuración para despliegues de ramas
+[context.branch-deploy.environment]
+  VITE_APP_ENV = "staging"
+
+# Configuración para despliegues de vista previa
+[context.deploy-preview.environment]
+  VITE_APP_ENV = "preview"
+
+# Redirección principal para SPA (Single Page Application)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Redirección API
+# Redirección para la API - Actualiza la URL con la de tu backend real
 [[redirects]]
   from = "/api/*"
-  to = "https://eva3-proyecto-ti.onrender.com/api/:splat"
+  to = "https://sigepa-backend.your-backend-service.com/api/:splat"
   status = 200
   force = true
-  headers = { Access-Control-Allow-Origin = "*" }
-
-# Encabezados básicos
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-
-# Variables de entorno para producción
-[context.production.environment]
-  VITE_APP_ENV = "production"
-
-# Variables de entorno para despliegues de ramas
-[context.branch-deploy.environment]
-  VITE_APP_ENV = "staging"
-
-# Variables de entorno para vistas previas
-[context.deploy-preview.environment]
-  VITE_APP_ENV = "preview"
+  headers = { Access-Control-Allow-Origin = "https://sigepa.netlify.app" }
 
 # Opciones de seguridad recomendadas
 [[headers]]
@@ -44,5 +37,4 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    # Política de seguridad actualizada con la URL del backend
-    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sigepa.netlify.app https://eva3-proyecto-ti.onrender.com https://*.amazonaws.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" 
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sigepa.netlify.app https://sigepa-backend.your-backend-service.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" 
