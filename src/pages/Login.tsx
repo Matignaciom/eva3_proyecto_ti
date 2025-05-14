@@ -4,8 +4,8 @@ import styles from './Login.module.css';
 import SEO from '../components/SEO';
 
 export default function Login() {
-  const [email, setEmail] = useState('ana1@example.com'); // Valor predeterminado para pruebas
-  const [password, setPassword] = useState('contrasena123'); // Valor predeterminado para pruebas
+  const [email, setEmail] = useState(''); // Eliminado valor predeterminado
+  const [password, setPassword] = useState(''); // Eliminado valor predeterminado
   const [showPassword, setShowPassword] = useState(false);
   const [showEmailInfo, setShowEmailInfo] = useState(false);
   const [showPasswordInfo, setShowPasswordInfo] = useState(false);
