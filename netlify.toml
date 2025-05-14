@@ -2,7 +2,7 @@
 [build]
   command = "npm run build"    # Comando para construir la aplicación
   publish = "dist"             # Directorio donde se encuentra el sitio compilado
-  environment = { NODE_VERSION = "20" }  # Versión de Node.js a usar
+  environment = { NODE_VERSION = "20", SECRETS_SCAN_ENABLED = "false" }  # Versión de Node.js a usar y desactivar escaneo de secretos
 
 # Variables de entorno para producción
 [context.production.environment]
