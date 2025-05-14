@@ -1,15 +1,45 @@
 import { useState, useEffect } from 'react';
 import styles from './PaginasComunes.module.css';
 
+// Interfaz para el modelo de parcela
+interface Parcela {
+  idParcela: number;
+  nombre: string;
+  direccion: string;
+  area: number;
+  estado: 'Al día' | 'Pendiente' | 'Atrasado';
+  fechaAdquisicion: string;
+  valorCatastral: number;
+}
+
+// Interfaz para estadísticas de pago
+interface Estadisticas {
+  totalGastos: number;
+  gastosPagados: number;
+  gastosPendientes: number;
+  gastosAtrasados: number;
+}
+
 // Interfaz para el modelo de usuario
 interface Usuario {
   id: number;
   nombreCompleto: string;
   email: string;
   rut: string;
-  direccion: string;
+  direccion?: string;
   comunidad: string;
+  idComunidad?: number;
   rol: string;
+  parcelas?: Parcela[];
+  estadisticas?: Estadisticas;
+}
+
+// Interfaz para estadísticas de comunidad
+interface EstadisticasComunidad {
+  copropietarios: number;
+  parcelas: number;
+  gastosPendientes: number;
+  avisos: number;
 }
 
 export default function Perfil() {
@@ -43,50 +73,200 @@ export default function Perfil() {
   const [showPasswordNuevo, setShowPasswordNuevo] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   
-  // Determinar si el usuario es administrador (en una aplicación real esto vendría de un contexto de autenticación)
+  // Estados para determinar el rol del usuario
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Estadísticas de la comunidad para administradores
+  const [estadisticasComunidad, setEstadisticasComunidad] = useState<EstadisticasComunidad>({
+    copropietarios: 0,
+    parcelas: 0,
+    gastosPendientes: 0,
+    avisos: 0
+  });
+  
+  // Definir la URL base del servidor API (fuera de los métodos)
+  const API_BASE_URL = 'http://localhost:3000';
+  
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
+  
+  // Efecto para el temporizador de redirección
+  useEffect(() => {
+    if (redirectCountdown !== null && redirectCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRedirectCountdown(redirectCountdown - 1);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } else if (redirectCountdown === 0) {
+      window.location.href = '/login';
+    }
+  }, [redirectCountdown]);
+  
+  // Iniciar redirección
+  const startRedirect = (seconds: number = 3) => {
+    setRedirectCountdown(seconds);
+  };
   
   // Efecto para obtener los datos del usuario al cargar la página
   useEffect(() => {
-    // En un caso real, obtendríamos estos datos del backend
-    // Simulando una solicitud a la API
-    setIsLoading(true);
-    
-    // Aquí simulamos la obtención del rol del usuario
-    // En una aplicación real, esto vendría del contexto de autenticación o del backend
-    const userRole = localStorage.getItem('userRole') || 'Copropietario';
-    const isUserAdmin = userRole === 'Administrador';
-    setIsAdmin(isUserAdmin);
-    
-    setTimeout(() => {
-      // Datos simulados del usuario según su rol
-      const userData: Usuario = {
-        id: 1,
-        nombreCompleto: 'Juan Pérez',
-        email: 'juan.perez@example.com',
-        rut: '12.345.678-9',
-        direccion: 'Av. Principal 123, Santiago',
-        comunidad: 'SIGEPA Parcelas',
-        rol: isUserAdmin ? 'Administrador' : 'Copropietario'
-      };
+    const fetchUserData = async () => {
+      setIsLoading(true);
       
-      setUsuario(userData);
-      setFormData({
-        nombreCompleto: userData.nombreCompleto,
-        email: userData.email,
-        direccion: userData.direccion || '',
-        passwordActual: '',
-        passwordNuevo: '',
-        passwordConfirm: ''
-      });
-      
-      setIsLoading(false);
-    }, 1000);
+      try {
+        // Obtener el token y el ID del usuario desde localStorage
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        // Verificar si hay información de autenticación
+        if (!token || !userId) {
+          console.error('No hay token o ID de usuario en localStorage');
+          setMessage({ 
+            type: 'error', 
+            text: 'No se pudo encontrar la información de autenticación. Por favor, inicia sesión nuevamente.'
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Verificar que el ID de usuario sea un número
+        const userIdNum = parseInt(userId, 10);
+        if (isNaN(userIdNum) || userIdNum <= 0) {
+          console.error('ID de usuario inválido:', userId);
+          setMessage({ 
+            type: 'error', 
+            text: 'El ID de usuario almacenado no es válido. Por favor, inicia sesión nuevamente.'
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log(`Intentando obtener datos del usuario ${userId} desde ${API_BASE_URL}/api/usuarios/${userId}`);
+        
+        // Realizar la solicitud al backend para obtener datos del usuario
+        const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Respuesta de error del servidor:', response.status, errorData);
+          
+          if (response.status === 404) {
+            console.error('Usuario no encontrado. ID:', userId);
+            
+            // Limpiar la información de autenticación
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            
+            throw new Error('Usuario no encontrado. La sesión será cerrada automáticamente.');
+          } else if (response.status === 401) {
+            // Limpiar la información de autenticación
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+            
+            throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+          } else {
+            throw new Error(`Error al obtener datos del usuario (${response.status}).`);
+          }
+        }
+        
+        let data;
+        try {
+          data = await response.json();
+          console.log('Datos del usuario recibidos:', data);
+        } catch (e) {
+          console.error('Error al parsear la respuesta JSON:', e);
+          throw new Error('Error al procesar la respuesta del servidor.');
+        }
+        
+        if (!data || !data.usuario) {
+          console.error('Datos de usuario incompletos:', data);
+          throw new Error('La respuesta del servidor no contiene información del usuario.');
+        }
+        
+        const userData = data.usuario;
+        
+        // Actualizar estados
+        setUsuario(userData);
+        setFormData({
+          nombreCompleto: userData.nombreCompleto,
+          email: userData.email,
+          direccion: userData.direccion || '',
+          passwordActual: '',
+          passwordNuevo: '',
+          passwordConfirm: ''
+        });
+        
+        // Determinar si es administrador
+        setIsAdmin(userData.rol === 'Administrador');
+        
+        // Si es administrador, cargar estadísticas de la comunidad
+        if (userData.rol === 'Administrador' && userData.idComunidad) {
+          try {
+            const estadisticasResponse = await fetch(`${API_BASE_URL}/api/comunidades/${userData.idComunidad}/estadisticas`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (estadisticasResponse.ok) {
+              const estadisticasData = await estadisticasResponse.json();
+              console.log('Estadísticas de comunidad recibidas:', estadisticasData);
+              
+              if (estadisticasData && estadisticasData.estadisticas) {
+                setEstadisticasComunidad(estadisticasData.estadisticas);
+              }
+            } else {
+              console.error('Error al obtener estadísticas de la comunidad:', estadisticasResponse.status);
+            }
+          } catch (error) {
+            console.error('Error al cargar estadísticas de la comunidad:', error);
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error al cargar datos del usuario:', error);
+        
+        // Si el error menciona "sesión será cerrada", redirigir a login después de un retraso
+        if (error instanceof Error && error.message.includes('sesión será cerrada')) {
+          setMessage({ 
+            type: 'error', 
+            text: error.message
+          });
+          
+          // Iniciar la redirección
+          startRedirect(5);
+        } else {
+          setMessage({ 
+            type: 'error', 
+            text: error instanceof Error ? error.message : 'No se pudieron cargar los datos del perfil.'
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserData();
   }, []);
   
   // Manejador para cambios en el formulario
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Log para debugging
+    if (name === 'direccion') {
+      console.log(`Actualizando dirección: "${value}"`);
+    }
+    
     setFormData({
       ...formData,
       [name]: value
@@ -94,7 +274,7 @@ export default function Perfil() {
   };
   
   // Manejador para guardar cambios en los datos personales
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validar email
@@ -103,41 +283,163 @@ export default function Perfil() {
       return;
     }
     
-    // En un caso real, enviaríamos estos datos al backend
     setIsLoading(true);
+    setMessage({ type: '', text: '' });
     
-    // Simulando un guardado exitoso
-    setTimeout(() => {
-      setUsuario({
-        ...usuario,
-        nombreCompleto: formData.nombreCompleto,
-        email: formData.email,
-        direccion: formData.direccion
+    try {
+      // Obtener el token y el ID del usuario desde localStorage
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        throw new Error('No hay token o ID de usuario en localStorage');
+      }
+      
+      // Mostrar los datos que se enviarán al servidor
+      console.log('Datos que se enviarán al servidor:');
+      console.log('nombreCompleto:', formData.nombreCompleto);
+      console.log('email:', formData.email);
+      console.log('direccion:', formData.direccion);
+      
+      console.log(`Actualizando perfil del usuario ${userId} en ${API_BASE_URL}/api/usuarios/${userId}`);
+      
+      // Realizar la solicitud al backend para actualizar datos
+      const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nombreCompleto: formData.nombreCompleto,
+          email: formData.email,
+          direccion: formData.direccion
+        })
       });
       
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Respuesta de error del servidor al actualizar perfil:', response.status, errorData);
+        
+        if (response.status === 404) {
+          throw new Error('Usuario no encontrado.');
+        } else if (response.status === 401) {
+          throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        } else if (response.status === 400) {
+          throw new Error('Datos inválidos. Verifique la información proporcionada.');
+        } else {
+          throw new Error(`Error al actualizar perfil (${response.status}).`);
+        }
+      }
+      
+      let data;
+      try {
+        data = await response.json();
+        console.log('Respuesta completa de actualización de perfil:', data);
+        console.log('Datos del usuario recibidos del servidor:', data.usuario);
+        console.log('Dirección recibida del servidor:', data.usuario.direccion);
+      } catch (e) {
+        console.error('Error al parsear la respuesta JSON al actualizar perfil:', e);
+        throw new Error('Error al procesar la respuesta del servidor.');
+      }
+      
+      if (!data || !data.usuario) {
+        console.error('Datos de respuesta incompletos:', data);
+        throw new Error('La respuesta del servidor no contiene la información actualizada.');
+      }
+      
+      // Crear una copia del usuario actualizado asegurándonos de que todos los campos estén definidos
+      const usuarioActualizado = {
+        ...data.usuario,
+        direccion: data.usuario.direccion || '' // Asegurarnos de que direccion nunca sea undefined
+      };
+      
+      console.log('Estado actual del usuario antes de actualizar:', usuario);
+      
+      // Actualizar el estado del usuario con la respuesta del servidor
+      setUsuario(usuarioActualizado);
+      
+      // El log inmediato después de setUsuario no mostrará el estado actualizado debido a que
+      // las actualizaciones de estado en React son asíncronas
+      
+      // Actualizar formData para mantener sincronizados los datos
+      setFormData({
+        ...formData,
+        nombreCompleto: usuarioActualizado.nombreCompleto,
+        email: usuarioActualizado.email,
+        direccion: usuarioActualizado.direccion
+      });
+      
+      // Verificar que la actualización se aplicó correctamente usando un efecto secundario
+      // para asegurarnos de que el estado se ha actualizado
+      setTimeout(() => {
+        console.log('Estado del usuario después de actualizar (después de timeout):', {
+          ...usuario,
+          // Mostrar los valores específicos que nos interesan
+          nombreCompleto: usuario.nombreCompleto,
+          email: usuario.email,
+          direccion: usuario.direccion
+        });
+      }, 500);
+      
+      console.log('Datos actualizados correctamente:', {
+        nombre: usuarioActualizado.nombreCompleto,
+        email: usuarioActualizado.email,
+        direccion: usuarioActualizado.direccion
+      });
+      
+      // Actualizar datos en localStorage si cambió el email
+      if (formData.email !== usuario.email) {
+        localStorage.setItem('userEmail', formData.email);
+      }
+      
+      // Si cambió el nombre
+      if (formData.nombreCompleto !== usuario.nombreCompleto) {
+        localStorage.setItem('userName', formData.nombreCompleto);
+      }
+      
       setIsEditing(false);
-      setIsLoading(false);
       setMessage({ type: 'success', text: 'Perfil actualizado correctamente.' });
       
       // Limpiar el mensaje después de 5 segundos
       setTimeout(() => {
         setMessage({ type: '', text: '' });
       }, 5000);
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'Error al actualizar perfil'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Manejador para cambiar la contraseña
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar contraseñas
+    // Validar contraseñas con reglas más estrictas
     if (formData.passwordActual.length < 6) {
       setMessage({ type: 'error', text: 'La contraseña actual no es válida.' });
       return;
     }
     
-    if (formData.passwordNuevo.length < 6) {
-      setMessage({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+    // Validar que la nueva contraseña sea segura
+    if (formData.passwordNuevo.length < 8) {
+      setMessage({ type: 'error', text: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+      return;
+    }
+    
+    // Validar que la contraseña contenga al menos una letra mayúscula, una minúscula y un número
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+    if (!passwordRegex.test(formData.passwordNuevo)) {
+      setMessage({ 
+        type: 'error', 
+        text: 'La contraseña debe contener al menos una letra mayúscula, una minúscula y un número.' 
+      });
       return;
     }
     
@@ -146,11 +448,56 @@ export default function Perfil() {
       return;
     }
     
-    // En un caso real, enviaríamos estos datos al backend
     setIsLoading(true);
+    setMessage({ type: '', text: '' });
     
-    // Simulando un cambio de contraseña exitoso
-    setTimeout(() => {
+    try {
+      // Obtener el token y el ID del usuario desde localStorage
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        throw new Error('No hay token o ID de usuario en localStorage');
+      }
+      
+      console.log(`Cambiando contraseña del usuario ${userId}`);
+      
+      // Realizar la solicitud al backend para cambiar contraseña
+      const response = await fetch(`${API_BASE_URL}/api/usuarios/${userId}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          passwordActual: formData.passwordActual,
+          passwordNuevo: formData.passwordNuevo
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Respuesta de error al cambiar contraseña:', response.status, errorData);
+        
+        if (response.status === 400) {
+          throw new Error('La contraseña actual es incorrecta.');
+        } else if (response.status === 401) {
+          throw new Error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        } else {
+          throw new Error(`Error al cambiar contraseña (${response.status}).`);
+        }
+      }
+      
+      let data;
+      try {
+        data = await response.json();
+        console.log('Respuesta de cambio de contraseña:', data);
+      } catch (e) {
+        console.error('Error al parsear la respuesta JSON al cambiar contraseña:', e);
+        throw new Error('Error al procesar la respuesta del servidor.');
+      }
+      
+      // Limpiar campos de contraseña
       setFormData({
         ...formData,
         passwordActual: '',
@@ -158,19 +505,38 @@ export default function Perfil() {
         passwordConfirm: ''
       });
       
+      // Restablecer estados de visibilidad
+      setShowPasswordActual(false);
+      setShowPasswordNuevo(false);
+      setShowPasswordConfirm(false);
+      
       setIsChangingPassword(false);
-      setIsLoading(false);
       setMessage({ type: 'success', text: 'Contraseña actualizada correctamente.' });
       
       // Limpiar el mensaje después de 5 segundos
       setTimeout(() => {
         setMessage({ type: '', text: '' });
       }, 5000);
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Error al cambiar contraseña:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error instanceof Error ? error.message : 'Error al cambiar contraseña'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Cancelar edición
   const handleCancelEdit = () => {
+    console.log('Cancelando edición, restaurando datos originales:', {
+      nombreOriginal: usuario.nombreCompleto,
+      emailOriginal: usuario.email,
+      direccionOriginal: usuario.direccion || 'No especificada'
+    });
+    
     setFormData({
       ...formData,
       nombreCompleto: usuario.nombreCompleto,
@@ -200,25 +566,164 @@ export default function Perfil() {
     setMessage({ type: '', text: '' });
   };
   
+  // Función para formatear el valor monetario
+  const formatMoney = (amount: number): string => {
+    return amount.toLocaleString('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  };
+  
+  // Función para obtener la clase de estado según el estado de la parcela
+  const getEstadoClass = (estado: string): string => {
+    switch (estado) {
+      case 'Al día':
+        return styles.estadoAlDia;
+      case 'Pendiente':
+        return styles.estadoPendiente;
+      case 'Atrasado':
+        return styles.estadoAtrasado;
+      default:
+        return '';
+    }
+  };
+  
+  // Función para formatear un RUT en formato chileno
+  const formatRut = (rut: string): string => {
+    // Si está vacío o no disponible
+    if (!rut) {
+      return 'No disponible';
+    }
+    
+    // Si ya tiene un guión, puede estar formateado, pero asegurémonos
+    if (rut.includes('-')) {
+      // Separar en dos partes: número y dígito verificador
+      const [numPart, dvPart] = rut.split('-');
+      
+      // Limpiar puntos del número si existen
+      const numClean = numPart.replace(/\./g, '');
+      
+      // Formatear número con puntos (formato chileno)
+      let formattedNum = '';
+      let counter = 0;
+      
+      for (let i = numClean.length - 1; i >= 0; i--) {
+        if (counter === 3) {
+          formattedNum = '.' + formattedNum;
+          counter = 0;
+        }
+        formattedNum = numClean[i] + formattedNum;
+        counter++;
+      }
+      
+      return `${formattedNum}-${dvPart}`;
+    }
+    
+    // Si es un hash (muy largo), mostramos "No disponible"
+    if (rut.length > 20) {
+      return 'No disponible';
+    }
+    
+    // Asumimos que es un número sin formato, aplicamos formato chileno
+    try {
+      // Obtener el dígito verificador (último carácter)
+      const dv = rut.slice(-1);
+      
+      // Obtener la parte numérica
+      const numPart = rut.slice(0, -1).replace(/\D/g, '');
+      
+      // Formatear con puntos (de derecha a izquierda)
+      let rutFormateado = '';
+      let counter = 0;
+      
+      for (let i = numPart.length - 1; i >= 0; i--) {
+        if (counter === 3) {
+          rutFormateado = '.' + rutFormateado;
+          counter = 0;
+        }
+        rutFormateado = numPart[i] + rutFormateado;
+        counter++;
+      }
+      
+      return `${rutFormateado}-${dv}`;
+    } catch (error) {
+      console.error('Error al formatear RUT:', error);
+      return rut || 'No disponible'; // Devolver sin cambios o indicar no disponible
+    }
+  };
+  
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Mi Perfil</h1>
       </div>
       
+      {message.text && (
+        <div className={`${styles.messageBox} ${message.type === 'error' ? styles.errorMessage : styles.successMessage}`}>
+          {message.text}
+          {redirectCountdown !== null && (
+            <div className={styles.redirectNotice}>
+              <p>Serás redirigido al inicio de sesión en {redirectCountdown} segundos...</p>
+            </div>
+          )}
+        </div>
+      )}
+      
       {isLoading ? (
         <div className={styles.loadingState}>
           <div className={styles.loadingSpinner}></div>
           <p>Cargando información...</p>
         </div>
+      ) : redirectCountdown !== null ? (
+        <div className={styles.errorState}>
+          <div className={styles.profileCard}>
+            <div className={styles.profileSection}>
+              <h3 className={styles.sectionTitle}>Sesión finalizada</h3>
+              <p>Tu sesión ha sido cerrada debido a un problema de autenticación.</p>
+              <p>Serás redirigido a la página de inicio de sesión en <strong>{redirectCountdown}</strong> segundos.</p>
+              <div className={styles.formActions}>
+                <button 
+                  className={styles.buttonPrimary}
+                  onClick={() => window.location.href = '/login'}
+                >
+                  Ir a inicio de sesión ahora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : !usuario.id && message.type === 'error' ? (
+        <div className={styles.errorState}>
+          <div className={styles.profileCard}>
+            <div className={styles.profileSection}>
+              <h3 className={styles.sectionTitle}>Error al cargar el perfil</h3>
+              <p>No se pudo cargar la información de tu perfil. Por favor:</p>
+              <ul>
+                <li>Verifica tu conexión a internet</li>
+                <li>Comprueba que el servidor esté en funcionamiento</li>
+                <li>Intenta cerrar sesión y volver a iniciar sesión</li>
+              </ul>
+              <div className={styles.formActions}>
+                <button 
+                  className={styles.buttonPrimary}
+                  onClick={() => window.location.reload()}
+                >
+                  Intentar nuevamente
+                </button>
+                <button 
+                  className={styles.buttonSecondary}
+                  onClick={() => window.location.href = '/login'}
+                >
+                  Ir a inicio de sesión
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className={styles.profileContainer}>
-          {message.text && (
-            <div className={`${styles.messageBox} ${message.type === 'error' ? styles.errorMessage : styles.successMessage}`}>
-              {message.text}
-            </div>
-          )}
-          
           <div className={styles.profileCard}>
             <div className={styles.profileHeader}>
               <div className={styles.profileAvatar}>
@@ -304,26 +809,39 @@ export default function Perfil() {
                   
                   <div className={styles.detailItem}>
                     <span className={styles.detailLabel}>RUT</span>
-                    <span className={styles.detailValue}>{usuario.rut}</span>
+                    <span className={styles.detailValue}>{formatRut(usuario.rut || '')}</span>
                     <span className={styles.detailNote}>(No modificable)</span>
                   </div>
                   
                   <div className={styles.detailItem}>
                     <span className={styles.detailLabel}>Dirección</span>
-                    <span className={styles.detailValue}>{usuario.direccion || 'No especificada'}</span>
+                    <span className={styles.detailValue}>
+                      {usuario.direccion ? usuario.direccion : 'No especificada'}
+                    </span>
                   </div>
                   
                   {isAdmin ? (
-                    <div className={styles.detailItem}>
-                      <span className={styles.detailLabel}>Administra</span>
-                      <span className={styles.detailValue}>{usuario.comunidad}</span>
-                    </div>
+                    <>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Cargo</span>
+                        <span className={styles.detailValue}>Administrador del Sistema</span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Comunidad que Administra</span>
+                        <span className={styles.detailValue}>{usuario.comunidad}</span>
+                      </div>
+                    </>
                   ) : (
-                    <div className={styles.detailItem}>
-                      <span className={styles.detailLabel}>Comunidad</span>
-                      <span className={styles.detailValue}>{usuario.comunidad}</span>
-                      <span className={styles.detailNote}>(Gestionado por Administrador)</span>
-                    </div>
+                    <>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Comunidad</span>
+                        <span className={styles.detailValue}>{usuario.comunidad}</span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Estado</span>
+                        <span className={styles.detailValue}>Miembro Activo</span>
+                      </div>
+                    </>
                   )}
                   
                   <div className={styles.formActions}>
@@ -484,24 +1002,164 @@ export default function Perfil() {
               )}
             </div>
             
-            {isAdmin && (
+            {!isAdmin && usuario.parcelas && usuario.parcelas.length > 0 && (
               <div className={styles.profileSection}>
-                <h3 className={styles.sectionTitle}>Información de Administrador</h3>
-                <div className={styles.profileDetails}>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Cargo</span>
-                    <span className={styles.detailValue}>Administrador del Sistema</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Permisos</span>
-                    <span className={styles.detailValue}>Gestión completa del sistema</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Fecha de nombramiento</span>
-                    <span className={styles.detailValue}>01/01/2023</span>
-                  </div>
+                <h3 className={styles.sectionTitle}>Mis Parcelas</h3>
+                <div className={styles.parcelasContainer}>
+                  {usuario.parcelas.map(parcela => (
+                    <div key={parcela.idParcela} className={styles.parcelaCard}>
+                      <div className={styles.parcelaHeader}>
+                        <h4 className={styles.parcelaNombre}>{parcela.nombre}</h4>
+                        <span className={`${styles.parcelaEstado} ${getEstadoClass(parcela.estado)}`}>
+                          {parcela.estado}
+                        </span>
+                      </div>
+                      
+                      <div className={styles.parcelaDetails}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Dirección</span>
+                          <span className={styles.detailValue}>{parcela.direccion}</span>
+                        </div>
+                        
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Área</span>
+                          <span className={styles.detailValue}>{parcela.area} hectáreas</span>
+                        </div>
+                        
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Fecha de Adquisición</span>
+                          <span className={styles.detailValue}>{parcela.fechaAdquisicion}</span>
+                        </div>
+                        
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Valor Catastral</span>
+                          <span className={styles.detailValue}>{formatMoney(parcela.valorCatastral)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
+            
+            {!isAdmin && (
+              <div className={styles.profileSection}>
+                <h3 className={styles.sectionTitle}>Resumen de Gastos</h3>
+                {usuario.estadisticas ? (
+                  <div className={styles.estadisticasContainer}>
+                    <div className={styles.estadisticaCard}>
+                      <div className={styles.estadisticaValor}>{usuario.estadisticas.totalGastos || 0}</div>
+                      <div className={styles.estadisticaLabel}>Total de gastos</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.pagados}`}>
+                      <div className={styles.estadisticaValor}>{usuario.estadisticas.gastosPagados || 0}</div>
+                      <div className={styles.estadisticaLabel}>Pagados</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.pendientes}`}>
+                      <div className={styles.estadisticaValor}>{usuario.estadisticas.gastosPendientes || 0}</div>
+                      <div className={styles.estadisticaLabel}>Pendientes</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.atrasados}`}>
+                      <div className={styles.estadisticaValor}>{usuario.estadisticas.gastosAtrasados || 0}</div>
+                      <div className={styles.estadisticaLabel}>Atrasados</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <p>No hay información de gastos disponible.</p>
+                    <p>Los gastos aparecerán aquí una vez que se registren en el sistema.</p>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {isAdmin && (
+              <>
+                <div className={styles.profileSection}>
+                  <h3 className={styles.sectionTitle}>Información de Administrador</h3>
+                  <div className={styles.profileDetails}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Cargo</span>
+                      <span className={styles.detailValue}>Administrador del Sistema</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Comunidad que administra</span>
+                      <span className={styles.detailValue}>{usuario.comunidad}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Responsabilidades</span>
+                      <span className={styles.detailValue}>Gestión de usuarios, parcelas y gastos comunitarios</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Permisos</span>
+                      <span className={styles.detailValue}>Gestión completa de la comunidad</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Contacto de soporte</span>
+                      <span className={styles.detailValue}>soporte@sigepa.cl</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className={styles.profileSection}>
+                  <h3 className={styles.sectionTitle}>Resumen de la Comunidad {usuario.comunidad}</h3>
+                  <div className={styles.estadisticasContainer}>
+                    <div className={styles.estadisticaCard}>
+                      <div className={styles.estadisticaValor}>{estadisticasComunidad.copropietarios}</div>
+                      <div className={styles.estadisticaLabel}>Copropietarios</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.pagados}`}>
+                      <div className={styles.estadisticaValor}>{estadisticasComunidad.parcelas}</div>
+                      <div className={styles.estadisticaLabel}>Parcelas</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.pendientes}`}>
+                      <div className={styles.estadisticaValor}>{estadisticasComunidad.gastosPendientes}</div>
+                      <div className={styles.estadisticaLabel}>Gastos Pendientes</div>
+                    </div>
+                    
+                    <div className={`${styles.estadisticaCard} ${styles.atrasados}`}>
+                      <div className={styles.estadisticaValor}>{estadisticasComunidad.avisos}</div>
+                      <div className={styles.estadisticaLabel}>Notificaciones</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className={styles.profileSection}>
+                  <h3 className={styles.sectionTitle}>Accesos Rápidos</h3>
+                  <div className={styles.quickAccessGrid}>
+                    <div className={styles.quickAccessCard} onClick={() => window.location.href = '/dashboard/admin/usuarios'}>
+                      <div className={styles.quickAccessIcon}>👥</div>
+                      <div className={styles.quickAccessLabel}>Gestionar Usuarios</div>
+                    </div>
+                    <div className={styles.quickAccessCard} onClick={() => window.location.href = '/dashboard/admin/parcelas'}>
+                      <div className={styles.quickAccessIcon}>🏞️</div>
+                      <div className={styles.quickAccessLabel}>Administrar Parcelas</div>
+                    </div>
+                    <div className={styles.quickAccessCard} onClick={() => window.location.href = '/dashboard/admin/gastos'}>
+                      <div className={styles.quickAccessIcon}>💰</div>
+                      <div className={styles.quickAccessLabel}>Gestionar Gastos</div>
+                    </div>
+                    <div className={styles.quickAccessCard} onClick={() => window.location.href = '/dashboard/admin/reportes'}>
+                      <div className={styles.quickAccessIcon}>📊</div>
+                      <div className={styles.quickAccessLabel}>Ver Reportes</div>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.formActions} style={{ marginTop: '20px' }}>
+                    <button 
+                      className={`${styles.buttonPrimary}`}
+                      onClick={() => window.location.href = '/dashboard/admin'}
+                    >
+                      Panel de Administración
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>

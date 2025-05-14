@@ -77,6 +77,7 @@ interface MapaGeoespacialProps {
   propietarioId?: number;       // Filtrar por propietario específico
   filtroEstado?: string;        // Filtrar por estado (Al día, Pendiente, Atrasado)
   mostrarTodas?: boolean;       // Mostrar todas las parcelas (para administrador)
+  idComunidad?: number;         // ID de la comunidad para filtrar parcelas
   // Altura personalizable del mapa
   height?: string;
   // Callback para cuando se selecciona una parcela
@@ -88,6 +89,7 @@ export default function MapaGeoespacial({
   propietarioId, 
   filtroEstado,
   mostrarTodas = false,
+  idComunidad,
   height = '500px',
   onSelectParcela
 }: MapaGeoespacialProps) {
@@ -96,9 +98,25 @@ export default function MapaGeoespacial({
   const [filteredParcelas, setFilteredParcelas] = useState<any[]>([]);
   const [apiKeyError, setApiKeyError] = useState<boolean>(false);
   
+  // Cargar la API de Google Maps
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '', // Usar variable de entorno si está disponible
+  });
+  
   // Efecto para filtrar parcelas según los criterios proporcionados
   useEffect(() => {
     let result = [...parcelasMock];
+    
+    // Obtener parcelas reales si hay ID de comunidad
+    if (idComunidad && isLoaded) {
+      // En un sistema real, aquí se haría una llamada a la API para obtener las parcelas 
+      // de la comunidad específica usando el idComunidad
+      console.log(`Filtrando parcelas por comunidad: ${idComunidad}`);
+      
+      // De momento seguimos usando los datos mock, pero en una implementación real
+      // aquí iría el fetch de parcelas por comunidad
+    }
     
     // Si no se debe mostrar todas, aplicar filtros
     if (!mostrarTodas) {
@@ -133,13 +151,7 @@ export default function MapaGeoespacial({
     }
     
     setFilteredParcelas(result);
-  }, [parcelaId, propietarioId, filtroEstado, mostrarTodas]);
-
-  // Cargar la API de Google Maps
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '', // Usar variable de entorno si está disponible
-  });
+  }, [parcelaId, propietarioId, filtroEstado, mostrarTodas, idComunidad, isLoaded]);
 
   // Verificar si hay un error de clave de API
   useEffect(() => {

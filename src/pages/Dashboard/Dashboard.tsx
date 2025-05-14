@@ -11,8 +11,9 @@ interface DashboardProps {
 
 export default function Dashboard({ userRole: propUserRole, children }: DashboardProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
-  const [userRole, setUserRole] = useState(propUserRole || 'Copropietario'); // Valor por defecto
-  const [userName, setUserName] = useState('Juan Pérez');
+  const [userRole, setUserRole] = useState(propUserRole || '');
+  const [userName, setUserName] = useState('');
+  const [userId, setUserId] = useState('');
   const navigate = useNavigate();
 
   // Efecto para manejar el tamaño de la ventana
@@ -25,31 +26,39 @@ export default function Dashboard({ userRole: propUserRole, children }: Dashboar
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // En un caso real, aquí verificaríamos si el usuario está autenticado
-  // y obtendríamos su información desde el servidor o estado global
+  // Obtener los datos reales del usuario desde localStorage
   useEffect(() => {
-    // Simulación de obtención de datos del usuario
     const getUserData = () => {
-      // Aquí iría la lógica para obtener los datos reales del usuario
-      // Por ahora usamos datos de ejemplo
-      const mockUserData = {
-        name: 'Juan Pérez',
-        role: propUserRole || localStorage.getItem('userRole') || 'Copropietario', // Intentar recuperar de localStorage
-      };
+      // Intentar obtener datos del usuario desde localStorage
+      const storedUserName = localStorage.getItem('userName');
+      const storedUserRole = propUserRole || localStorage.getItem('userRole');
+      const storedUserId = localStorage.getItem('userId');
       
-      setUserName(mockUserData.name);
-      setUserRole(mockUserData.role);
-      
-      // Guardar el rol en localStorage para que otros componentes puedan acceder a él
-      localStorage.setItem('userRole', mockUserData.role);
+      // Verificar si hay datos en localStorage
+      if (storedUserName && storedUserRole) {
+        setUserName(storedUserName);
+        setUserRole(storedUserRole);
+        
+        if (storedUserId) {
+          setUserId(storedUserId);
+        }
+      } else {
+        // Si no hay datos en localStorage, usar valores por defecto o redirigir al login
+        setUserName('Usuario');
+        setUserRole(propUserRole || 'Copropietario');
+        // Opcionalmente redirigir al login si no hay datos de usuario
+        // navigate('/login');
+      }
     };
     
     getUserData();
-  }, [propUserRole]);
+  }, [propUserRole, navigate]);
 
   // Efecto para guardar el rol en localStorage cuando cambie
   useEffect(() => {
-    localStorage.setItem('userRole', userRole);
+    if (userRole) {
+      localStorage.setItem('userRole', userRole);
+    }
   }, [userRole]);
 
   const toggleSidebar = () => {
@@ -101,39 +110,98 @@ export default function Dashboard({ userRole: propUserRole, children }: Dashboar
       </div>
       
       <div className={styles.contentArea}>
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Estado de Pagos</h2>
-          </div>
-          <div className={styles.cardBody}>
-            {userRole.toLowerCase() === 'administrador' ? (
-              <p>Tienes <strong>5 pagos</strong> pendientes por revisar.</p>
-            ) : (
-              <p>Tienes <strong>2 pagos</strong> pendientes para este mes.</p>
-            )}
-          </div>
-        </div>
-        
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Últimos Avisos</h2>
-          </div>
-          <div className={styles.cardBody}>
-            <p>Hay <strong>5 nuevos avisos</strong> desde tu última visita.</p>
-          </div>
-        </div>
-        
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Documentos Recientes</h2>
-          </div>
-          <div className={styles.cardBody}>
-            <p>Se han subido <strong>3 nuevos documentos</strong> a la plataforma.</p>
-          </div>
-        </div>
-        
-        {userRole.toLowerCase() === 'administrador' && (
+        {userRole && userRole.toLowerCase() === 'copropietario' && (
           <>
+            <div className={styles.welcomeMessage}>
+              <h2>¡Bienvenido/a, {userName}!</h2>
+              <p>Este es tu panel de control para gestionar tu parcela y pagos en la comunidad.</p>
+            </div>
+            
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Estado de Pagos</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Tienes <strong>2 pagos</strong> pendientes para este mes.</p>
+                <button 
+                  className={styles.cardAction}
+                  onClick={() => navigate('/dashboard/pagos')}
+                >
+                  Ver detalles
+                </button>
+              </div>
+            </div>
+            
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Últimos Avisos</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Hay <strong>5 nuevos avisos</strong> desde tu última visita.</p>
+                <div className={styles.notificationList}>
+                  <div className={styles.notificationItem}>
+                    <span className={styles.notificationDot}></span>
+                    <p>Corte de agua programado para el miércoles 10/06</p>
+                  </div>
+                  <div className={styles.notificationItem}>
+                    <span className={styles.notificationDot}></span>
+                    <p>Nueva cuota de mantención a partir del próximo mes</p>
+                  </div>
+                  <div className={styles.notificationItem}>
+                    <span className={styles.notificationDot}></span>
+                    <p>Reunión de copropietarios este sábado</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Mi Parcela</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Parcela ID: <strong>{userId || 'No disponible'}</strong></p>
+                <p>Estado: <span className={styles.statusBadge}>Activo</span></p>
+                <button 
+                  className={styles.cardAction}
+                  onClick={() => navigate('/dashboard/parcela')}
+                >
+                  Ver detalles
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+  
+        {(!userRole || userRole.toLowerCase() === 'administrador') && (
+          <>
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Estado de Pagos</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Tienes <strong>5 pagos</strong> pendientes por revisar.</p>
+              </div>
+            </div>
+            
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Últimos Avisos</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Hay <strong>5 nuevos avisos</strong> desde tu última visita.</p>
+              </div>
+            </div>
+            
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>Documentos Recientes</h2>
+              </div>
+              <div className={styles.cardBody}>
+                <p>Se han subido <strong>3 nuevos documentos</strong> a la plataforma.</p>
+              </div>
+            </div>
+            
             <div className={styles.card}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>Usuarios Activos</h2>

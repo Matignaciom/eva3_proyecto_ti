@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import MapaGeoespacial from '../../components/Maps/MapaGeoespacial';
 import styles from './PaginasComunes.module.css';
 
-// Datos de ejemplo para las parcelas del propietario
+// Datos de ejemplo para las parcelas que se usarán solo si no hay datos reales
 const parcelasUsuarioMock = [
   {
     id: 1,
     nombre: 'Parcela A-123',
-    propietario: 'Juan Pérez',
+    propietario: '', // Se llenará dinámicamente
     propietarioId: 1,
     superficie: '5000 m²',
     direccion: 'Camino Los Pinos 567',
@@ -20,7 +20,7 @@ const parcelasUsuarioMock = [
   {
     id: 4,
     nombre: 'Parcela D-101',
-    propietario: 'Juan Pérez',
+    propietario: '', // Se llenará dinámicamente
     propietarioId: 1,
     superficie: '3200 m²',
     direccion: 'Camino El Roble 789',
@@ -33,23 +33,55 @@ const parcelasUsuarioMock = [
 ];
 
 export default function MiParcela() {
-  // ID del usuario actual (en un caso real, vendría de la autenticación)
-  const usuarioId = 1;
+  // Obtenemos los datos del usuario del localStorage
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const [nombreUsuario, setNombreUsuario] = useState<string>('');
   
   // Estado para almacenar la parcela seleccionada actualmente
-  const [parcelaSeleccionada, setParcelaSeleccionada] = useState<any>(parcelasUsuarioMock[0]);
-  const [todasLasParcelas, setTodasLasParcelas] = useState<any[]>(parcelasUsuarioMock);
+  const [parcelaSeleccionada, setParcelaSeleccionada] = useState<any>(null);
+  const [todasLasParcelas, setTodasLasParcelas] = useState<any[]>([]);
+  const [cargando, setCargando] = useState<boolean>(true);
   
-  // Simular carga de datos
+  // Obtener datos del usuario al cargar el componente
+  useEffect(() => {
+    const userIdFromStorage = localStorage.getItem('userId');
+    const userNameFromStorage = localStorage.getItem('userName');
+    
+    if (userIdFromStorage) {
+      setUsuarioId(parseInt(userIdFromStorage));
+    }
+    
+    if (userNameFromStorage) {
+      setNombreUsuario(userNameFromStorage);
+    }
+  }, []);
+  
+  // Simular carga de datos una vez que tenemos el ID del usuario
   useEffect(() => {
     // En un caso real, aquí haríamos la llamada a la API para obtener las parcelas del usuario
-    setTodasLasParcelas(parcelasUsuarioMock);
-    
-    // Establecer la primera parcela como seleccionada por defecto
-    if (parcelasUsuarioMock.length > 0) {
-      setParcelaSeleccionada(parcelasUsuarioMock[0]);
+    if (usuarioId || nombreUsuario) {
+      setCargando(true);
+      
+      // Simular una llamada a la API
+      setTimeout(() => {
+        // Clonar las parcelas mock y asignar el nombre del usuario real
+        const parcelasConDatosReales = parcelasUsuarioMock.map(parcela => ({
+          ...parcela,
+          propietario: nombreUsuario || 'Usuario',
+          propietarioId: usuarioId || 1
+        }));
+        
+        setTodasLasParcelas(parcelasConDatosReales);
+        
+        // Establecer la primera parcela como seleccionada por defecto
+        if (parcelasConDatosReales.length > 0) {
+          setParcelaSeleccionada(parcelasConDatosReales[0]);
+        }
+        
+        setCargando(false);
+      }, 500); // Simular tiempo de carga
     }
-  }, [usuarioId]);
+  }, [usuarioId, nombreUsuario]);
   
   // Comprobar si el usuario tiene múltiples parcelas
   const tieneMultiplesParcelas = todasLasParcelas.length > 1;
@@ -61,6 +93,22 @@ export default function MiParcela() {
       setParcelaSeleccionada(parcela);
     }
   };
+  
+  // Mostrar estado de carga
+  if (cargando) {
+    return (
+      <div className={styles.pageContainer}>
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>Mi Parcela</h1>
+        </div>
+        
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Cargando información de tus parcelas...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Si no hay parcelas, mostrar mensaje
   if (todasLasParcelas.length === 0) {
@@ -176,7 +224,7 @@ export default function MiParcela() {
             <h2 className={styles.cardTitle}>Ubicación</h2>
             {tieneMultiplesParcelas ? (
               // Si tiene múltiples parcelas, mostrar todas pero resaltar la seleccionada
-              <MapaGeoespacial propietarioId={usuarioId} height="400px" />
+              <MapaGeoespacial propietarioId={usuarioId || 1} height="400px" />
             ) : (
               // Si tiene solo una parcela, mostrar solo esa
               <MapaGeoespacial parcelaId={parcelaSeleccionada.id} height="400px" />
@@ -249,8 +297,8 @@ export default function MiParcela() {
                   </svg>
                 </div>
                 <div className={styles.activityContent}>
-                  <span className={styles.activityText}>Notificación de pago</span>
-                  <span className={styles.activityDate}>15/07/2023</span>
+                  <span className={styles.activityText}>Notificación recibida</span>
+                  <span className={styles.activityDate}>28/07/2023</span>
                 </div>
               </div>
             </div>

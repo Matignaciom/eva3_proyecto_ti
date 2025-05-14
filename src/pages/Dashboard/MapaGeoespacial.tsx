@@ -2,25 +2,117 @@ import { useState, useEffect } from 'react';
 import MapaGeoespacial from '../../components/Maps/MapaGeoespacial';
 import styles from './PaginasComunes.module.css';
 
-// Datos de ejemplo para los propietarios
-const propietariosMock = [
-  { id: 0, nombre: 'Todos los propietarios' },
-  { id: 1, nombre: 'Juan Pérez' },
-  { id: 2, nombre: 'María González' },
-  { id: 3, nombre: 'Pedro Sánchez' },
-  { id: 4, nombre: 'Ana Martínez' }
-];
+// API URL base
+const API_BASE_URL = 'http://localhost:3000';
 
 export default function PaginaMapaGeoespacial() {
   const [filtroEstado, setFiltroEstado] = useState<string>('todos');
   const [filtroPropietario, setFiltroPropietario] = useState<number>(0); // 0 = Todos los propietarios
+  const [propietarios, setPropietarios] = useState<{ id: number, nombre: string }[]>([]);
   const [estadisticas, setEstadisticas] = useState({
-    total: 22,
-    alDia: 15,
-    pendientes: 5,
-    atrasados: 2
+    total: 0,
+    alDia: 0,
+    pendientes: 0,
+    atrasados: 0
   });
   const [parcelaSeleccionada, setParcelaSeleccionada] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [idComunidad, setIdComunidad] = useState<number | null>(null);
+  
+  // Obtener datos del usuario y su comunidad
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token || !userId) {
+          throw new Error('No hay información de autenticación');
+        }
+        
+        // Obtener datos del usuario para saber su comunidad
+        const userResponse = await fetch(`${API_BASE_URL}/api/usuarios/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!userResponse.ok) {
+          throw new Error('Error al obtener datos del usuario');
+        }
+        
+        const userData = await userResponse.json();
+        
+        if (!userData.usuario || !userData.usuario.idComunidad) {
+          throw new Error('No se pudo obtener la comunidad del usuario');
+        }
+        
+        const comunidadId = userData.usuario.idComunidad;
+        setIdComunidad(comunidadId);
+        
+        // Si es administrador, obtener todos los propietarios de su comunidad
+        if (userData.usuario.rol === 'Administrador') {
+          const propietariosResponse = await fetch(`${API_BASE_URL}/api/usuarios`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (propietariosResponse.ok) {
+            const propietariosData = await propietariosResponse.json();
+            
+            // Filtrar solo los copropietarios
+            const copropietarios = propietariosData.usuarios
+              .filter((user: any) => user.rol === 'Copropietario')
+              .map((user: any) => ({
+                id: user.id,
+                nombre: user.nombreCompleto
+              }));
+            
+            // Añadir opción "Todos los propietarios"
+            setPropietarios([
+              { id: 0, nombre: 'Todos los propietarios' },
+              ...copropietarios
+            ]);
+          }
+        }
+        
+        // Obtener estadísticas de parcelas para esta comunidad
+        const parcelasResponse = await fetch(`${API_BASE_URL}/api/parcelas`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (parcelasResponse.ok) {
+          const parcelasData = await parcelasResponse.json();
+          
+          // Calcular estadísticas
+          const total = parcelasData.parcelas.length;
+          const alDia = parcelasData.parcelas.filter((p: any) => p.estado === 'Al día').length;
+          const pendientes = parcelasData.parcelas.filter((p: any) => p.estado === 'Pendiente').length;
+          const atrasados = parcelasData.parcelas.filter((p: any) => p.estado === 'Atrasado').length;
+          
+          setEstadisticas({
+            total,
+            alDia,
+            pendientes,
+            atrasados
+          });
+        }
+        
+      } catch (err) {
+        console.error('Error al cargar datos:', err);
+        setError(err instanceof Error ? err.message : 'Error al cargar datos');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
   
   const handleSelectParcela = (parcela: any) => {
     setParcelaSeleccionada(parcela);
@@ -31,23 +123,25 @@ export default function PaginaMapaGeoespacial() {
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Mapa Geoespacial</h1>
         <div className={styles.pageActions}>
-          <div className={styles.filterContainer}>
-            <label htmlFor="filtroPropietario" className={styles.filterLabel}>
-              Propietario:
-            </label>
-            <select 
-              id="filtroPropietario" 
-              className={styles.filterSelect}
-              value={filtroPropietario}
-              onChange={(e) => setFiltroPropietario(Number(e.target.value))}
-            >
-              {propietariosMock.map((propietario) => (
-                <option key={propietario.id} value={propietario.id}>
-                  {propietario.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+          {propietarios.length > 0 && (
+            <div className={styles.filterContainer}>
+              <label htmlFor="filtroPropietario" className={styles.filterLabel}>
+                Propietario:
+              </label>
+              <select 
+                id="filtroPropietario" 
+                className={styles.filterSelect}
+                value={filtroPropietario}
+                onChange={(e) => setFiltroPropietario(Number(e.target.value))}
+              >
+                {propietarios.map((propietario) => (
+                  <option key={propietario.id} value={propietario.id}>
+                    {propietario.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           
           <div className={styles.filterContainer}>
             <label htmlFor="filtroEstado" className={styles.filterLabel}>
@@ -68,109 +162,105 @@ export default function PaginaMapaGeoespacial() {
         </div>
       </div>
 
-      <div className={styles.mapSection}>
-        <div className={styles.mapLegend}>
-          <h3 className={styles.legendTitle}>Leyenda</h3>
-          <div className={styles.legendItems}>
-            <div className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotGreen}`}></span>
-              <span>Al día</span>
-            </div>
-            <div className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotYellow}`}></span>
-              <span>Pendiente</span>
-            </div>
-            <div className={styles.legendItem}>
-              <span className={`${styles.legendDot} ${styles.legendDotRed}`}></span>
-              <span>Atrasado</span>
-            </div>
-          </div>
+      {isLoading ? (
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Cargando mapa y datos...</p>
         </div>
-        
-        {/* Componente del mapa con altura personalizada */}
-        <MapaGeoespacial 
-          height="600px"
-          mostrarTodas={filtroPropietario === 0}
-          propietarioId={filtroPropietario !== 0 ? filtroPropietario : undefined}
-          filtroEstado={filtroEstado}
-          onSelectParcela={handleSelectParcela}
-        />
-      </div>
-
-      {parcelaSeleccionada && (
-        <div className={styles.parcelaDetail}>
-          <div className={styles.parcelaDetailHeader}>
-            <h2 className={styles.parcelaDetailTitle}>{parcelaSeleccionada.title}</h2>
-            <span className={`${styles.parcelaDetailStatus} ${
-              parcelaSeleccionada.estado === 'Al día' 
-                ? styles.statusGreen 
-                : parcelaSeleccionada.estado === 'Pendiente' 
-                ? styles.statusYellow 
-                : styles.statusRed
-            }`}>
-              {parcelaSeleccionada.estado}
-            </span>
+      ) : error ? (
+        <div className={styles.errorState}>
+          <p>Error: {error}</p>
+          <button 
+            className={styles.buttonPrimary}
+            onClick={() => window.location.reload()}
+          >
+            Intentar nuevamente
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.dashboardStats}>
+            <div className={`${styles.statCard} ${styles.statTotal}`}>
+              <div className={styles.statValue}>{estadisticas.total}</div>
+              <div className={styles.statLabel}>Total de parcelas</div>
+            </div>
+            <div className={`${styles.statCard} ${styles.statPagados}`}>
+              <div className={styles.statValue}>{estadisticas.alDia}</div>
+              <div className={styles.statLabel}>Al día</div>
+            </div>
+            <div className={`${styles.statCard} ${styles.statPendientes}`}>
+              <div className={styles.statValue}>{estadisticas.pendientes}</div>
+              <div className={styles.statLabel}>Pendientes</div>
+            </div>
+            <div className={`${styles.statCard} ${styles.statAtrasados}`}>
+              <div className={styles.statValue}>{estadisticas.atrasados}</div>
+              <div className={styles.statLabel}>Atrasados</div>
+            </div>
           </div>
           
-          <div className={styles.parcelaDetailBody}>
-            <div className={styles.parcelaDetailItem}>
-              <span className={styles.parcelaDetailLabel}>Propietario:</span>
-              <span className={styles.parcelaDetailValue}>{parcelaSeleccionada.propietario}</span>
-            </div>
-            <div className={styles.parcelaDetailItem}>
-              <span className={styles.parcelaDetailLabel}>Dirección:</span>
-              <span className={styles.parcelaDetailValue}>{parcelaSeleccionada.direccion}</span>
-            </div>
-            <div className={styles.parcelaDetailItem}>
-              <span className={styles.parcelaDetailLabel}>Superficie:</span>
-              <span className={styles.parcelaDetailValue}>{parcelaSeleccionada.superficie}</span>
-            </div>
-            
-            <div className={styles.parcelaDetailActions}>
-              <button className={styles.actionButton}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                Ver documentos
-              </button>
-              <button className={`${styles.actionButton} ${styles.primaryButton}`}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                Enviar notificación
-              </button>
+          <div className={styles.mapLegend}>
+            <h3 className={styles.legendTitle}>Leyenda</h3>
+            <div className={styles.legendItems}>
+              <div className={styles.legendItem}>
+                <span className={`${styles.legendDot} ${styles.legendDotGreen}`}></span>
+                <span>Al día</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={`${styles.legendDot} ${styles.legendDotYellow}`}></span>
+                <span>Pendiente</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={`${styles.legendDot} ${styles.legendDotRed}`}></span>
+                <span>Atrasado</span>
+              </div>
             </div>
           </div>
-        </div>
+          
+          {/* Componente del mapa con altura personalizada */}
+          <MapaGeoespacial 
+            height="600px"
+            mostrarTodas={filtroPropietario === 0}
+            propietarioId={filtroPropietario !== 0 ? filtroPropietario : undefined}
+            filtroEstado={filtroEstado}
+            onSelectParcela={handleSelectParcela}
+            idComunidad={idComunidad || undefined}
+          />
+          
+          {parcelaSeleccionada && (
+            <div className={styles.parcelaDetailCard}>
+              <h3>Detalles de la Parcela</h3>
+              <div className={styles.detailGrid}>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Nombre:</span>
+                  <span className={styles.detailValue}>{parcelaSeleccionada.title}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Estado:</span>
+                  <span className={`${styles.detailValue} ${
+                    parcelaSeleccionada.estado === 'Al día' 
+                      ? styles.estadoAlDia
+                      : parcelaSeleccionada.estado === 'Pendiente'
+                      ? styles.estadoPendiente
+                      : styles.estadoAtrasado
+                  }`}>{parcelaSeleccionada.estado}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Propietario:</span>
+                  <span className={styles.detailValue}>{parcelaSeleccionada.propietario}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Superficie:</span>
+                  <span className={styles.detailValue}>{parcelaSeleccionada.superficie}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Dirección:</span>
+                  <span className={styles.detailValue}>{parcelaSeleccionada.direccion}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
-
-      <div className={styles.infoSection}>
-        <div className={styles.infoCard}>
-          <h2 className={styles.infoTitle}>Resumen</h2>
-          <div className={styles.infoStats}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Total Parcelas:</span>
-              <span className={styles.statValue}>{estadisticas.total}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Al día:</span>
-              <span className={`${styles.statValue} ${styles.statValueGreen}`}>{estadisticas.alDia}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Pendientes:</span>
-              <span className={`${styles.statValue} ${styles.statValueYellow}`}>{estadisticas.pendientes}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Atrasados:</span>
-              <span className={`${styles.statValue} ${styles.statValueRed}`}>{estadisticas.atrasados}</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 } 

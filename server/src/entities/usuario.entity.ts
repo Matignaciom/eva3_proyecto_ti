@@ -1,17 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Comunidad } from './comunidad.entity';
 
-@Entity('usuario')
+@Entity('Usuario')
 export class Usuario {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'idUsuario' })
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ name: 'nombreCompleto', length: 255 })
   nombreCompleto: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, length: 255 })
   email: string;
 
-  @Column()
+  @Column({ name: 'contrasena', length: 64 })
   password: string;
 
   @Column({
@@ -20,6 +21,16 @@ export class Usuario {
     default: 'Copropietario'
   })
   rol: string;
+
+  @Column({ length: 64 })
+  rut: string;
+
+  @Column({ name: 'idComunidad' })
+  idComunidad: number;
+
+  @ManyToOne(() => Comunidad, comunidad => comunidad.usuarios)
+  @JoinColumn({ name: 'idComunidad' })
+  comunidad: Comunidad;
 
   @Column({ nullable: true })
   telefono: string;

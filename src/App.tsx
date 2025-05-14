@@ -10,6 +10,10 @@ import HistorialPagos from './pages/Dashboard/HistorialPagos'
 import Estadisticas from './pages/Dashboard/Estadisticas'
 import Perfil from './pages/Dashboard/Perfil'
 import Calendario from './pages/Dashboard/Calendario'
+import GestionUsuarios from './pages/Dashboard/GestionUsuarios'
+import Resumen from './pages/Dashboard/Resumen'
+import CrearAviso from './pages/Dashboard/CrearAviso'
+import AlertasPendientes from './pages/Dashboard/AlertasPendientes'
 import Layout from './components/Layout'
 import './App.css'
 
@@ -36,6 +40,12 @@ export default function App() {
         <Route path="/dashboard/estadisticas" element={<Dashboard><Estadisticas /></Dashboard>} />
         <Route path="/dashboard/perfil" element={<Dashboard><Perfil /></Dashboard>} />
         <Route path="/dashboard/calendario" element={<Dashboard><Calendario /></Dashboard>} />
+        
+        {/* Nuevas rutas para administrador */}
+        <Route path="/dashboard/usuarios" element={<Dashboard><GestionUsuarios /></Dashboard>} />
+        <Route path="/dashboard/resumen" element={<Dashboard><Resumen /></Dashboard>} />
+        <Route path="/dashboard/notificaciones" element={<Dashboard><CrearAviso /></Dashboard>} />
+        <Route path="/dashboard/alertas" element={<Dashboard><AlertasPendientes /></Dashboard>} />
         
         {/* Capturar todas las subrutas del dashboard */}
         <Route path="/dashboard/*" element={<Dashboard />} />
