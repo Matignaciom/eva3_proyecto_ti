@@ -62,18 +62,25 @@ export default function Login() {
         setShowStatusMessage(true);
       }
       
-      const response = await fetch('/', { 
+      const response = await fetch('/api/comunidades', { 
         method: 'GET',
         // Añadir un timeout para no esperar demasiado
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).catch((error) => {
+        console.error('Error al conectar con el servidor:', error);
+        return null;
       });
       
-      if (response.ok) {
+      if (response && response.ok) {
         setServerStatus('online');
         if (showMessage) {
           setShowStatusMessage(true);
         }
       } else {
+        console.error('Error al conectar con el servidor');
         setServerStatus('offline');
         setShowStatusMessage(true); // Siempre mostramos el mensaje de error
       }

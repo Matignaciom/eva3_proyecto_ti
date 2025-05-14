@@ -54,28 +54,29 @@ export default function Register() {
         setShowStatusMessage(true);
       }
       
-      // Verificar si el servidor está en línea
-      const serverResponse = await fetch('/', {
+      // Verificar si el servidor está en línea usando una ruta pública
+      const comunidadesResponse = await fetch('/api/comunidades', {
         method: 'GET',
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).catch((error) => {
+        console.error('Error al conectar con el servidor:', error);
+        return null;
       });
       
-      if (serverResponse.ok) {
+      if (comunidadesResponse && comunidadesResponse.ok) {
         setServerStatus('online');
         if (showStatusMessage) {
           setShowStatusMessage(true);
         }
         
-        // Si el servidor está en línea, cargar las comunidades
-        const comunidadesResponse = await fetch('/api/comunidades');
-        
-        if (comunidadesResponse.ok) {
-          const data = await comunidadesResponse.json();
-          setComunidades(data.comunidades);
-        } else {
-          console.error('Error al cargar comunidades:', await comunidadesResponse.text());
-        }
+        // Procesar la respuesta de comunidades
+        const data = await comunidadesResponse.json();
+        setComunidades(data.comunidades || []);
       } else {
+        console.error('Error al conectar con el servidor o cargar comunidades');
         setServerStatus('offline');
         setShowStatusMessage(true); // Siempre mostrar en caso de error
       }
