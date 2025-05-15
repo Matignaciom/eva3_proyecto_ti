@@ -35,12 +35,24 @@ export default function RecuperarPassword() {
     setError('');
 
     try {
-      // Simulamos una verificación de correo
-      // En una implementación real, se enviaría una solicitud al servidor
-      // para verificar que el correo existe y enviar un código
-      
-      // Simulamos una demora
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Solicitar código de verificación
+      const response = await fetch('/.netlify/functions/recuperar-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al procesar la solicitud');
+      }
+
+      // En producción, el código se enviaría por email
+      // Por ahora, lo mostramos en la consola para pruebas
+      console.log('Código de verificación:', data.code);
       
       // Avanzar al siguiente paso
       setStep(2);
@@ -63,13 +75,8 @@ export default function RecuperarPassword() {
     setError('');
 
     try {
-      // Simulamos una verificación del código
-      // En una implementación real, se enviaría el código al servidor para verificarlo
-      
-      // Simulamos una demora
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Para propósitos de demostración, cualquier código es válido
+      // En producción, aquí verificarías el código
+      // Por ahora, avanzamos al siguiente paso
       setStep(3);
     } catch (err) {
       setError('Código de verificación incorrecto. Intenta nuevamente.');
@@ -100,11 +107,24 @@ export default function RecuperarPassword() {
     setError('');
 
     try {
-      // Simulamos un cambio de contraseña
-      // En una implementación real, se enviaría la nueva contraseña al servidor
-      
-      // Simulamos una demora
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Actualizar contraseña
+      const response = await fetch('/.netlify/functions/recuperar-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          verificationCode,
+          newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar la contraseña');
+      }
       
       // Redirigir al login con un mensaje de éxito
       navigate('/login', { state: { message: 'Contraseña actualizada correctamente' } });

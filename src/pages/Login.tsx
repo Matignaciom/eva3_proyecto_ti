@@ -103,31 +103,20 @@ export default function Login() {
       setLoading(true);
       setError('');
       
-      console.log('Iniciando solicitud de login...');
-      console.log('URL:', '/api/auth/login');
-      console.log('Credenciales:', { email, password });
-      
-      // Realizar la solicitud al backend
-      const response = await fetch('/api/auth/login', {
+      // Realizar la solicitud a la Netlify Function
+      const response = await fetch('/.netlify/functions/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password })
-        // Eliminamos credentials: 'include' para evitar problemas CORS
       });
       
-      console.log('Respuesta del servidor:', response.status, response.statusText);
-      
       const data = await response.json();
-      
-      console.log('Datos de respuesta:', data);
       
       if (!response.ok) {
         throw new Error(data.message || 'Credenciales incorrectas');
       }
-      
-      console.log('Login exitoso:', data);
       
       // Guardar el token en localStorage
       localStorage.setItem('token', data.token);
@@ -144,14 +133,12 @@ export default function Login() {
       } else if (data.user.rol === 'Copropietario') {
         navigate('/dashboard/copropietario');
       } else {
-        // Si hay otros roles, manejarlos aquí
         navigate('/dashboard');
       }
       
     } catch (err: any) {
       console.error('Error completo:', err);
       setError(err.message || 'Error al iniciar sesión. Verifica tus credenciales.');
-      console.error('Error al iniciar sesión:', err);
     } finally {
       setLoading(false);
     }

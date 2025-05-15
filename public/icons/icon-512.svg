@@ -1,10 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f46e5" />
-      <stop offset="100%" stop-color="#06b6d4" />
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="64" fill="url(#gradient)" />
-  <text x="256" y="300" fill="white" font-family="Arial, sans-serif" font-size="220" font-weight="bold" text-anchor="middle">SP</text>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#4F46E5"/>
+  <path d="M128 256C128 185.307 185.307 128 256 128C326.693 128 384 185.307 384 256C384 326.693 326.693 384 256 384" stroke="white" stroke-width="32" stroke-linecap="round"/>
+  <path d="M256 384C185.307 384 128 326.693 128 256C128 185.307 185.307 128 256 128" stroke="white" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="64" fill="white"/>
 </svg> 

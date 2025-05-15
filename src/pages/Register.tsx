@@ -136,8 +136,8 @@ export default function Register() {
       setLoading(true);
       setError('');
       
-      // Realizar la solicitud al backend
-      const response = await fetch('/api/auth/register', {
+      // Realizar la solicitud a la Netlify Function
+      const response = await fetch('/.netlify/functions/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

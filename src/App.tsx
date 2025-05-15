@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { UNSAFE_NavigationContext as NavigationContext } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import RecuperarPassword from './pages/RecuperarPassword'
@@ -23,9 +24,17 @@ import './MobileMenuFix.css'
 import './OverflowFix.css'
 import './CardFix.css'
 
+// Configuración de las banderas futuras de React Router
+const router = {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+}
+
 export default function App() {
   return (
-    <Router>
+    <Router {...router}>
       <Routes>
         {/* Rutas públicas con Layout compartido */}
         <Route path="/" element={<Layout><Login /></Layout>} />
