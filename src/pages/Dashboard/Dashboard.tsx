@@ -25,14 +25,14 @@ export default function Dashboard({ userRole: propUserRole, children }: Dashboar
     
     // Forzar reflow del DOM para aplicar cambios de clase en móvil
     if (isMobile) {
-      const sidebar = document.querySelector(`.${styles.sidebar}`);
+      const sidebar = document.querySelector('.sidebar');
       if (sidebar) {
         if (isSidebarOpen) {
           sidebar.classList.add(styles.open);
         } else {
           sidebar.classList.remove(styles.open);
         }
-        void sidebar.offsetHeight; // Trigger reflow
+        (sidebar as HTMLElement).offsetHeight; // Trigger reflow
       }
     }
   }, [isSidebarOpen, isMobile]);

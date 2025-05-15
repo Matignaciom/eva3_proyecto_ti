@@ -1,15 +1,29 @@
 import { useState, useCallback, useMemo, useLayoutEffect, useEffect } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format } from "date-fns";
-import { parse } from "date-fns";
-import { startOfWeek } from "date-fns";
-import { getDay } from "date-fns";
+import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay, addDays, addHours, addWeeks } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import styles from "./Calendario.module.css";
-import { addDays, addHours, addWeeks } from "date-fns";
 
-// Configuración del locale para español
+// Interfaz para los eventos
+interface Evento {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  allDay?: boolean;
+  tipo: "pago" | "reunion" | "aviso";
+  descripcion: string;
+}
+
+interface ToolbarProps {
+  views: View[];
+  view: View;
+  onView: (view: View) => void;
+  onNavigate: (action: string) => void;
+  label: string;
+}
+
 const locales = {
   es: es,
 };
@@ -22,16 +36,21 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Interfaz para los eventos
-interface Evento {
-  id: number;
-  title: string;
-  start: Date;
-  end: Date;
-  allDay?: boolean;
-  tipo: "pago" | "reunion" | "aviso";
-  descripcion: string;
-}
+const messages = {
+  allDay: "Todo el día",
+  previous: "Anterior",
+  next: "Siguiente",
+  today: "Hoy",
+  month: "Mes",
+  week: "Semana",
+  day: "Día",
+  agenda: "Agenda",
+  date: "Fecha",
+  time: "Hora",
+  event: "Evento",
+  noEventsInRange: "No hay eventos en este rango",
+  showMore: (total: number) => `+ Ver más (${total})`,
+};
 
 export default function Calendario() {
   const hoy = new Date();
@@ -139,26 +158,6 @@ export default function Calendario() {
       className: className,
     };
   }, []);
-
-  // Traducción de textos del calendario
-  const messages = useMemo(
-    () => ({
-      allDay: "Todo el día",
-      previous: "« Anterior",
-      next: "Siguiente »",
-      today: "Hoy",
-      month: "MES",
-      week: "SEMANA",
-      day: "DÍA",
-      agenda: "AGENDA",
-      date: "Fecha",
-      time: "Hora",
-      event: "Evento",
-      noEventsInRange: "No hay eventos en este período",
-      showMore: (total: number) => `+ Ver ${total} más`,
-    }),
-    [],
-  );
 
   // Función para cerrar el modal
   const cerrarModal = useCallback(() => {
@@ -342,7 +341,7 @@ export default function Calendario() {
           views={window.innerWidth < 768 ? {month: true, agenda: true} : undefined}
           defaultView={window.innerWidth < 768 ? 'month' : undefined}
           components={{
-            toolbar: (props) => (
+            toolbar: (props: any) => (
               <div className="rbc-toolbar">
                 <span className="rbc-btn-group">
                   <button type="button" onClick={() => props.onNavigate('TODAY')}>
@@ -355,30 +354,23 @@ export default function Calendario() {
                     {messages.next}
                   </button>
                 </span>
-                <span 
-                  className="rbc-toolbar-label" 
-                  style={{ 
-                    color: '#4b5563', 
-                    fontWeight: 500,
-                    fontSize: '1.1rem',
-                    display: 'block',
-                    padding: '8px 0',
-                    textTransform: 'capitalize'
-                  }}
-                >
-                  {props.label}
-                </span>
+                <span className="rbc-toolbar-label">{props.label}</span>
                 <span className="rbc-btn-group">
-                  {props.views.map(name => (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => props.onView(name)}
-                      className={props.view === name ? 'rbc-active' : ''}
-                    >
-                      {messages[name]}
-                    </button>
-                  ))}
+                  {Object.keys(props.views)
+                    .filter((name) => props.views[name])
+                    .map((name) => {
+                      const label = messages[name as keyof typeof messages];
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => props.onView(name)}
+                          className={props.view === name ? 'rbc-active' : ''}
+                        >
+                          {typeof label === 'string' ? label : name}
+                        </button>
+                      );
+                    })}
                 </span>
               </div>
             )

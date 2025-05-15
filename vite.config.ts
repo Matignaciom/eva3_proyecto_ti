@@ -40,6 +40,6 @@ export default defineConfig({
     // Optimizar el tamaño del bundle
     target: 'es2018',
     // Habilitar análisis de código muerto
-    sourcemap: false,
+    sourcemap: true,
   }
 })
