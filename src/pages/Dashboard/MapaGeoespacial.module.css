@@ -1,0 +1,595 @@
+/* Estilos para la página de Mapa Geoespacial */
+
+.pageContainer {
+  width: 100%;
+  padding: 0 0 2rem 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.pageActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.primaryButton {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 8px;
+}
+
+.primaryButton:hover {
+  background-color: #4338ca;
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  padding: 0.5rem 1.5rem 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  color: #4b5563;
+  min-width: 120px;
+  max-width: 100%;
+}
+
+.dashboardStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.statTotal::before {
+  background-color: #6b7280;
+}
+
+.statPagados::before {
+  background-color: #10b981;
+}
+
+.statPendientes::before {
+  background-color: #f59e0b;
+}
+
+.statAtrasados::before {
+  background-color: #ef4444;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.mapaContainer {
+  width: 100%;
+  height: 600px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.mapaView {
+  width: 100%;
+  height: 100%;
+}
+
+.mapaInfo {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.parcelaInfo {
+  flex: 1;
+  min-width: 300px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.parcelaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.parcelaTitulo {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.parcelaEstado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.estadoAlDia {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.estadoPendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.estadoAtrasado {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.parcelaDetalles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.detalleItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.detalleLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.detalleValor {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.parcelaAcciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.parcelaEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem;
+}
+
+.leyendaContainer {
+  flex: 0 0 250px;
+  width: 100%;
+}
+
+.leyendaCard {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  width: 100%;
+}
+
+.leyendaTitulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.leyendaItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.leyendaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.leyendaColor {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.colorAlDia {
+  background-color: #10b981;
+}
+
+.colorPendiente {
+  background-color: #f59e0b;
+}
+
+.colorAtrasado {
+  background-color: #ef4444;
+}
+
+.leyendaLabel {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.mapLegend {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.legendTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+}
+
+.legendItems {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendDotGreen {
+  background-color: #10b981;
+}
+
+.legendDotYellow {
+  background-color: #f59e0b;
+}
+
+.legendDotRed {
+  background-color: #ef4444;
+}
+
+.parcelaDetailCard {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.parcelaDetailCard h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* Estados de carga y error */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #4f46e5;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorState {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.errorState button {
+  margin-top: 1rem;
+}
+
+.buttonPrimary {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buttonPrimary:hover {
+  background-color: #4338ca;
+}
+
+/* Media queries */
+@media (max-width: 1024px) {
+  .dashboardStats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .mapaContainer {
+    height: 500px;
+  }
+  
+  .parcelaInfo, 
+  .leyendaContainer {
+    min-width: 100%;
+  }
+  
+  .parcelaDetailCard {
+    padding: 1.25rem;
+  }
+  
+  .mapLegend {
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  
+  .pageTitle {
+    margin-bottom: 0.5rem;
+  }
+  
+  .pageActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .mapaContainer {
+    height: 400px;
+  }
+  
+  .mapaInfo {
+    flex-direction: column;
+  }
+  
+  .leyendaContainer {
+    flex: 1;
+    width: 100%;
+  }
+  
+  .parcelaDetalles {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboardStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .parcelaDetailCard,
+  .leyendaCard,
+  .parcelaInfo {
+    padding: 1rem;
+  }
+  
+  .filterContainer {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filterSelect {
+    flex-grow: 1;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboardStats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .mapaContainer {
+    height: 300px;
+  }
+  
+  .parcelaHeader {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .parcelaAcciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .parcelaAcciones button {
+    width: 100%;
+  }
+  
+  .filterLabel {
+    font-size: 0.8rem;
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.8rem;
+  }
+  
+  .legendItems {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .parcelaDetailCard h3 {
+    font-size: 1rem;
+  }
+  
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+} 

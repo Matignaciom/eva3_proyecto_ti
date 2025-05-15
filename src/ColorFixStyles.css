@@ -1,0 +1,77 @@
+/* Estilos para corregir textos blancos */
+
+:root {
+  --text-color: #333333;
+  --text-color-light: #4b5563;
+  --text-color-heading: #1f2937;
+  --text-color-button: white;
+  --background-color: #f9fafb;
+}
+
+body, .app, #root {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+/* Estilos generales para todos los textos */
+p, span, div, td, li {
+  color: var(--text-color);
+}
+
+/* Estilos para encabezados */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color-heading);
+}
+
+/* Estilos para botones con fondo oscuro */
+button, .btn, .button, [type="button"], [type="submit"] {
+  color: var(--text-color-button);
+}
+
+/* Estilos para textos en tarjetas */
+.card, .card-body, .card-header, .card-title, .card-text {
+  color: var(--text-color);
+}
+
+/* Estilos para tablas */
+table, tr, td, th {
+  color: var(--text-color);
+}
+
+/* Corregir textos en bloques de tarjetas y paneles */
+.dashboard-card, .panel, .box, .container, .wrapper, .content {
+  color: var(--text-color);
+  background-color: white;
+}
+
+/* Corregir casos específicos */
+input, textarea, select {
+  color: var(--text-color);
+}
+
+/* Asegurarse de que los textos se vean con cualquier fondo */
+[style*="background-color: white"] * {
+  color: var(--text-color);
+}
+
+[style*="background-color: #fff"] * {
+  color: var(--text-color);
+}
+
+[style*="background-color: black"] * {
+  color: var(--text-color-button);
+}
+
+[style*="background-color: #000"] * {
+  color: var(--text-color-button);
+}
+
+/* Forzar texto oscuro en elementos con fondo claro */
+.bg-white, .bg-light {
+  color: var(--text-color) !important;
+}
+
+/* Forzar texto claro en elementos con fondo oscuro */
+.bg-dark, .bg-primary, .bg-secondary, .bg-success, .bg-danger, .bg-warning, .bg-info {
+  color: var(--text-color-button) !important;
+} 

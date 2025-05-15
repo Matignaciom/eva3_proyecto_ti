@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import MapaGeoespacial from '../../components/Maps/MapaGeoespacial';
-import styles from './PaginasComunes.module.css';
+import styles from './MapaGeoespacial.module.css';
 
 // API URL base
 const API_BASE_URL = 'http://localhost:3000';

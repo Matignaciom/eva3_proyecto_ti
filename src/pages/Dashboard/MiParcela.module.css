@@ -1,0 +1,862 @@
+/* Estilos para la página de Mi Parcela */
+
+.pageContainer {
+  width: 100%;
+  padding: 0 0 2rem 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.pageActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: auto;
+  margin-left: auto;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actionButton svg {
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.actionButton:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  transform: translateY(-2px);
+}
+
+.primaryButton {
+  background-color: #4f46e5;
+  color: white !important;
+  border: none;
+}
+
+.primaryButton span {
+  color: white !important;
+}
+
+.primaryButton svg {
+  stroke: white !important;
+}
+
+.primaryButton:hover {
+  background-color: #4338ca;
+}
+
+.parcelaSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.parcelaSelectorLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  padding: 0.5rem 1.5rem 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  background-color: white;
+  font-size: 0.875rem;
+  color: #4b5563;
+  max-width: 100%;
+  flex-grow: 1;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sideSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.detailCard, 
+.sideCard,
+.mapContainer,
+.historyCard {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  height: auto;
+  min-height: unset;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.detailCard:hover, 
+.sideCard:hover,
+.historyCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.cardTitle {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+  word-break: break-word;
+  margin-bottom: 0.5rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.statusAlDia {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusPendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.statusAtrasado {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.statusDotGreen {
+  background-color: #10b981;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.statusDotYellow {
+  background-color: #f59e0b;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.statusDotRed {
+  background-color: #ef4444;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.statusGreen {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.statusYellow {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.statusRed {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.mapContainer {
+  width: 100%;
+  min-height: 400px;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.paymentInfo {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+}
+
+.paymentSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+.paymentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.paymentLabel {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.paymentValue {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.paymentTotal {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.paymentTotalLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.paymentTotalValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.paymentDueDate {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.documentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.documentItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: all 0.2s;
+}
+
+.documentItem:hover {
+  background-color: #f3f4f6;
+}
+
+.documentIcon {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.documentInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+.documentName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentMeta {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.documentAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.documentAction:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.historyItem {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.historyDate {
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.historyDay {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.historyMonth {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.125rem;
+}
+
+.historyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.historyTitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+}
+
+.historyDescription {
+  font-size: 0.875rem;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.emptyStateTitle {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #4b5563;
+  margin: 1rem 0 0.5rem;
+}
+
+.emptyStateDescription {
+  color: #6b7280;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.pendingPayment {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+.paymentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.paymentTitle {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.paymentDate {
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.paymentAmount {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.paymentButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  background-color: #4f46e5;
+  color: white !important;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.paymentButton:hover {
+  background-color: #4338ca;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #f3f4f6;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.activityText {
+  font-size: 0.875rem;
+  color: #1f2937;
+}
+
+.activityDate {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.parcelasList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.parcelasListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.parcelasListItem:hover {
+  background-color: #f3f4f6;
+}
+
+.parcelasListItemActive {
+  background-color: #eff6ff;
+  border-left: 3px solid #4f46e5;
+}
+
+.parcelasListContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+
+.parcelasListTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.parcelasListAddress {
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estados de carga y error */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #4f46e5;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media queries - optimizadas */
+@media (max-width: 1280px) {
+  .contentGrid {
+    grid-template-columns: 3fr 2fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .sideSection {
+    order: -1;
+  }
+  
+  .cardTitle {
+    font-size: 1rem;
+  }
+  
+  .detailCard, 
+  .sideCard,
+  .mapContainer,
+  .historyCard {
+    padding: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .mapContainer {
+    min-height: 350px;
+  }
+  
+  .pageActions {
+    margin-left: 0;
+  }
+
+  .mapWrapper {
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 0 0.75rem 1.5rem 0.75rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .pageTitle {
+    margin-bottom: 0.25rem;
+    font-size: 1.25rem;
+    width: 100%;
+  }
+  
+  .pageActions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-left: 0;
+  }
+  
+  .actionButton {
+    flex: 1;
+    min-width: unset;
+  }
+  
+  .detailGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .sideSection {
+    margin-top: 0;
+    gap: 1.25rem;
+  }
+  
+  .parcelaSelector {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .filterSelect {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .detailCard, 
+  .sideCard,
+  .mapContainer,
+  .historyCard {
+    padding: 1rem;
+    margin-bottom: 0;
+  }
+
+  .mapContainer {
+    min-height: 300px;
+    order: 2; /* Para que el mapa aparezca después de los detalles */
+  }
+
+  .mainSection, .sideSection {
+    gap: 1rem;
+  }
+
+  .actionButton {
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.5rem);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .detailItem {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .detailItem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .mapWrapper {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contentGrid {
+    gap: 0.75rem;
+  }
+  
+  .pageContainer {
+    padding: 0 0.5rem 1rem 0.5rem;
+  }
+
+  .actionButton {
+    flex: 1 1 100%;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .actionButton svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+  }
+  
+  .parcelaSelector {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .filterSelect {
+    flex-grow: 1;
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem 0.4rem 0.5rem;
+  }
+  
+  .paymentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .cardTitle {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .mapWrapper {
+    height: 250px;
+  }
+  
+  .detailCard, 
+  .sideCard,
+  .mapContainer,
+  .historyCard {
+    padding: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .detailItem {
+    padding-bottom: 0.5rem;
+  }
+
+  .detailLabel {
+    font-size: 0.7rem;
+  }
+
+  .detailValue {
+    font-size: 0.85rem;
+  }
+}
+
+.mapWrapper {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: #f9fafb;
+} 

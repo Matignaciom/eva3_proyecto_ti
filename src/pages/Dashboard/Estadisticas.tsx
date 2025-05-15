@@ -12,7 +12,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
-import styles from './PaginasComunes.module.css';
+import styles from './Estadisticas.module.css';
 
 // Registrar los componentes de Chart.js que vamos a utilizar
 ChartJS.register(
@@ -114,6 +114,7 @@ export default function Estadisticas() {
   const [datosTipoGasto, setDatosTipoGasto] = useState(distribucionGastosData);
   const [datosComparativa, setDatosComparativa] = useState(comparativaParcelasData);
   const [datosEstadoPago, setDatosEstadoPago] = useState(estadosPagoData);
+  const [activeTarjeta, setActiveTarjeta] = useState<number | null>(null);
   
   // Efecto para cargar datos iniciales
   useEffect(() => {
@@ -316,13 +317,22 @@ export default function Estadisticas() {
   const formatearMonto = (valor: number) => {
     return valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
   };
+
+  // Función para animar tarjetas al hacer hover
+  const handleTarjetaHover = (index: number) => {
+    setActiveTarjeta(index);
+  };
+
+  const handleTarjetaLeave = () => {
+    setActiveTarjeta(null);
+  };
   
   if (isLoading) {
     return (
       <div className={styles.pageContainer}>
         <div className={styles.loadingState}>
           <div className={styles.loadingSpinner}></div>
-          <p>Cargando estadísticas...</p>
+          <p>Cargando tus estadísticas personalizadas...</p>
         </div>
       </div>
     );
@@ -331,50 +341,60 @@ export default function Estadisticas() {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Estadísticas</h1>
+        <h1 className={styles.pageTitle}>
+          <span className={styles.iconResumen}>📊</span> 
+          Resumen Financiero
+        </h1>
         
         {/* Filtros */}
-        <div className={styles.filterContainer}>
-          <label htmlFor="periodo" className={styles.filterLabel}>
-            Período:
-          </label>
-          <select 
-            id="periodo" 
-            className={styles.filterSelect}
-            value={periodoSeleccionado}
-            onChange={(e) => setPeriodoSeleccionado(e.target.value)}
-          >
-            <option value="3meses">Últimos 3 meses</option>
-            <option value="6meses">Últimos 6 meses</option>
-            <option value="12meses">Último año</option>
-          </select>
-        </div>
-        
-        {parcelasUsuario.length > 1 && (
+        <div className={styles.filtersContainer}>
           <div className={styles.filterContainer}>
-            <label htmlFor="parcela" className={styles.filterLabel}>
-              Parcela:
+            <label htmlFor="periodo" className={styles.filterLabel}>
+              <span className={styles.iconFilter}>🗓️</span> Período:
             </label>
             <select 
-              id="parcela" 
+              id="periodo" 
               className={styles.filterSelect}
-              value={parcelaSeleccionada === 'todas' ? 'todas' : parcelaSeleccionada}
-              onChange={(e) => setParcelaSeleccionada(e.target.value === 'todas' ? 'todas' : Number(e.target.value))}
+              value={periodoSeleccionado}
+              onChange={(e) => setPeriodoSeleccionado(e.target.value)}
             >
-              <option value="todas">Todas mis parcelas</option>
-              {parcelasUsuario.map((parcela) => (
-                <option key={parcela.id} value={parcela.id}>
-                  {parcela.nombre}
-                </option>
-              ))}
+              <option value="3meses">Últimos 3 meses</option>
+              <option value="6meses">Últimos 6 meses</option>
+              <option value="12meses">Último año</option>
             </select>
           </div>
-        )}
+          
+          {parcelasUsuario.length > 1 && (
+            <div className={styles.filterContainer}>
+              <label htmlFor="parcela" className={styles.filterLabel}>
+                <span className={styles.iconFilter}>🏡</span> Parcela:
+              </label>
+              <select 
+                id="parcela" 
+                className={styles.filterSelect}
+                value={parcelaSeleccionada === 'todas' ? 'todas' : parcelaSeleccionada}
+                onChange={(e) => setParcelaSeleccionada(e.target.value === 'todas' ? 'todas' : Number(e.target.value))}
+              >
+                <option value="todas">Todas mis parcelas</option>
+                {parcelasUsuario.map((parcela) => (
+                  <option key={parcela.id} value={parcela.id}>
+                    {parcela.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Panel de resumen */}
       <div className={styles.summaryPanel}>
-        <div className={styles.summaryCard}>
+        <div 
+          className={`${styles.summaryCard} ${activeTarjeta === 0 ? styles.activeCard : ''}`} 
+          onMouseEnter={() => handleTarjetaHover(0)}
+          onMouseLeave={handleTarjetaLeave}
+        >
+          <div className={styles.summaryIcon}>💰</div>
           <h3>Total Pagado</h3>
           <div className={styles.summaryAmount}>
             {formatearMonto(datosGastos.datasets[0].data.reduce((sum, valor) => sum + valor, 0))}
@@ -385,7 +405,12 @@ export default function Estadisticas() {
           </p>
         </div>
         
-        <div className={styles.summaryCard}>
+        <div 
+          className={`${styles.summaryCard} ${activeTarjeta === 1 ? styles.activeCard : ''}`}
+          onMouseEnter={() => handleTarjetaHover(1)}
+          onMouseLeave={handleTarjetaLeave}
+        >
+          <div className={styles.summaryIcon}>📝</div>
           <h3>Total Generado</h3>
           <div className={styles.summaryAmount}>
             {formatearMonto(datosGastos.datasets[1].data.reduce((sum, valor) => sum + valor, 0))}
@@ -395,12 +420,17 @@ export default function Estadisticas() {
           </p>
         </div>
         
-        <div className={styles.summaryCard}>
+        <div 
+          className={`${styles.summaryCard} ${activeTarjeta === 2 ? styles.activeCard : ''}`}
+          onMouseEnter={() => handleTarjetaHover(2)}
+          onMouseLeave={handleTarjetaLeave}
+        >
+          <div className={styles.summaryIcon}>
+            {balancePagosGastos.estado === 'positivo' ? '✅' : '⚠️'}
+          </div>
           <h3>Balance</h3>
-          <div className={styles.statusIndicators}>
-            <div className={`${styles.statusIndicator} ${balancePagosGastos.estado === 'positivo' ? styles.statusGreen : styles.statusRed}`}>
-              {balancePagosGastos.estado === 'positivo' ? 'Superávit' : 'Déficit'} {balancePagosGastos.porcentaje}%
-            </div>
+          <div className={`${styles.statusIndicator} ${balancePagosGastos.estado === 'positivo' ? styles.statusGreen : styles.statusRed}`}>
+            {balancePagosGastos.estado === 'positivo' ? 'Superávit' : 'Déficit'} {balancePagosGastos.porcentaje}%
           </div>
           <p className={styles.summaryDetail}>
             {formatearMonto(balancePagosGastos.diferencia)}
@@ -412,7 +442,9 @@ export default function Estadisticas() {
       <div className={styles.chartsGrid}>
         {/* Gráfico de evolución de gastos */}
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Evolución de Gastos y Pagos</h3>
+          <h3 className={styles.chartTitle}>
+            <span className={styles.chartIcon}>📈</span> Evolución de Gastos y Pagos
+          </h3>
           <div className={styles.chartContainer}>
             <Line 
               options={opcionesGraficoLineas} 
@@ -423,7 +455,9 @@ export default function Estadisticas() {
         
         {/* Gráfico de distribución por tipo */}
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Distribución por Tipo de Gasto</h3>
+          <h3 className={styles.chartTitle}>
+            <span className={styles.chartIcon}>🍩</span> Distribución por Tipo de Gasto
+          </h3>
           <div className={styles.chartContainer}>
             <Doughnut 
               options={opcionesGraficoCircular} 
@@ -435,7 +469,9 @@ export default function Estadisticas() {
         {/* Gráfico comparativo por parcela */}
         {parcelasUsuario.length > 1 && parcelaSeleccionada === 'todas' && (
           <div className={styles.chartCard}>
-            <h3 className={styles.chartTitle}>Comparativa por Parcela</h3>
+            <h3 className={styles.chartTitle}>
+              <span className={styles.chartIcon}>🏘️</span> Comparativa por Parcela
+            </h3>
             <div className={styles.chartContainer}>
               <Bar 
                 options={opcionesGraficoBarras} 
@@ -447,7 +483,9 @@ export default function Estadisticas() {
         
         {/* Gráfico de estado de pagos */}
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Estado de Pagos</h3>
+          <h3 className={styles.chartTitle}>
+            <span className={styles.chartIcon}>🔄</span> Estado de Pagos
+          </h3>
           <div className={styles.chartContainer}>
             <Pie 
               options={opcionesGraficoCircular} 
@@ -459,13 +497,17 @@ export default function Estadisticas() {
       
       {/* Sección de análisis */}
       <div className={styles.analysisSection}>
-        <h2 className={styles.sectionTitle}>Análisis de Gastos</h2>
+        <h2 className={styles.sectionTitle}>
+          <span className={styles.iconAnalisis}>🔍</span> Análisis Personalizado
+        </h2>
         
         <div className={styles.analysisPanels}>
           <div className={styles.analysisCard}>
-            <h3 className={styles.cardTitle}>Resumen</h3>
+            <h3 className={styles.cardTitle}>
+              <span className={styles.iconCard}>📊</span> Tu Resumen
+            </h3>
             <p className={styles.analysisText}>
-              Durante el período seleccionado, el gasto promedio mensual ha sido de <strong>{formatearMonto(promedioMensual)}</strong>. 
+              Durante el período seleccionado, tu gasto promedio mensual ha sido de <strong>{formatearMonto(promedioMensual)}</strong>. 
               Se observa una tendencia 
               {tendenciaGastos.tipo === 'estable' ? (
                 <span className={styles.positiveChange}> estable</span>
@@ -473,30 +515,44 @@ export default function Estadisticas() {
                 <span className={styles.negativeChange}> al alza ({tendenciaGastos.porcentaje}%)</span>
               ) : (
                 <span className={styles.positiveChange}> a la baja ({tendenciaGastos.porcentaje}%)</span>
-              )} en los gastos.
+              )} en tus gastos.
             </p>
             {balancePagosGastos.estado === 'positivo' && balancePagosGastos.diferencia > 0 && (
               <p className={styles.analysisText}>
-                Tu balance muestra un <span className={styles.positiveChange}>superávit del {balancePagosGastos.porcentaje}%</span>, lo que indica una gestión positiva de tus finanzas.
+                Tu balance muestra un <span className={styles.positiveChange}>superávit del {balancePagosGastos.porcentaje}%</span>, ¡lo que indica una excelente gestión de tus finanzas!
               </p>
             )}
             {balancePagosGastos.estado === 'negativo' && balancePagosGastos.diferencia > 0 && (
               <p className={styles.analysisText}>
-                Tu balance muestra un <span className={styles.negativeChange}>déficit del {balancePagosGastos.porcentaje}%</span>. Te recomendamos revisar tus pagos pendientes.
+                Tu balance muestra un <span className={styles.negativeChange}>déficit del {balancePagosGastos.porcentaje}%</span>. Te sugerimos revisar tus pagos pendientes.
               </p>
             )}
           </div>
           
           <div className={styles.analysisCard}>
-            <h3 className={styles.cardTitle}>Recomendaciones</h3>
+            <h3 className={styles.cardTitle}>
+              <span className={styles.iconCard}>💡</span> Recomendaciones para ti
+            </h3>
             <ul className={styles.recommendationList}>
-              <li>Se sugiere mantener un fondo de reserva de al menos <strong>{formatearMonto(fondoReservaRecomendado)}</strong> para gastos imprevistos.</li>
-              <li>Los gastos extraordinarios representan un <strong>{porcentajeExtraordinarios}%</strong> del total, {porcentajeExtraordinarios > 25 ? 'lo cual está por encima del rango recomendado.' : 'lo cual está dentro del rango esperado.'}</li>
+              <li className={styles.recommendationItem}>
+                <span className={styles.recommendationIcon}>💰</span>
+                Mantén un fondo de reserva de al menos <strong>{formatearMonto(fondoReservaRecomendado)}</strong> para gastos imprevistos.
+              </li>
+              <li className={styles.recommendationItem}>
+                <span className={styles.recommendationIcon}>📊</span>
+                Los gastos extraordinarios representan un <strong>{porcentajeExtraordinarios}%</strong> del total, {porcentajeExtraordinarios > 25 ? 'lo cual está por encima del rango recomendado.' : 'lo cual está dentro del rango esperado.'}
+              </li>
               {tendenciaGastos.tipo === 'alza' && tendenciaGastos.porcentaje > 10 && (
-                <li>Se observa un <strong>aumento significativo</strong> en los gastos recientes. Recomendamos analizar las causas de este incremento.</li>
+                <li className={styles.recommendationItem}>
+                  <span className={styles.recommendationIcon}>📈</span>
+                  Se observa un <strong>aumento significativo</strong> en tus gastos recientes. Recomendamos analizar las causas de este incremento.
+                </li>
               )}
               {balancePagosGastos.estado === 'negativo' && balancePagosGastos.porcentaje > 15 && (
-                <li>Considera programar pagos pendientes para evitar recargos por mora.</li>
+                <li className={styles.recommendationItem}>
+                  <span className={styles.recommendationIcon}>⏰</span>
+                  Considera programar tus pagos pendientes para evitar recargos por mora.
+                </li>
               )}
             </ul>
           </div>
@@ -509,14 +565,13 @@ export default function Estadisticas() {
           className={styles.buttonPrimary}
           onClick={() => alert('Descargando informe en PDF...')}
         >
-          Descargar PDF
+          <span className={styles.buttonIcon}>📑</span> Descargar PDF
         </button>
         <button 
           className={styles.buttonOutline}
           onClick={() => alert('Exportando datos a Excel...')}
-          style={{ marginLeft: '10px' }}
         >
-          Exportar a Excel
+          <span className={styles.buttonIcon}>📊</span> Exportar a Excel
         </button>
       </div>
     </div>

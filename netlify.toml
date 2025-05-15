@@ -1,11 +1,24 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
   environment = { NODE_VERSION = "20" }
+
+[dev]
+  command = "npm run dev"
+  port = 8888
+  targetPort = 5173
+  publish = "dist"
+  functions = "netlify/functions"
+  functionsPort = 9999
 
 # Configuración para el entorno de producción
 [context.production.environment]
   VITE_APP_ENV = "production"
+  DB_HOST = "sigepa-db-id.cfy6uk6aipzc.us-east-1.rds.amazonaws.com"
+  DB_USER = "admin"
+  DB_PASSWORD = "#SnKKerV!tH4gRf"
+  DB_NAME = "sigepa_db"
 
 # Configuración para despliegues de ramas
 [context.branch-deploy.environment]
@@ -21,13 +34,11 @@
   to = "/index.html"
   status = 200
 
-# Redirección para la API - Actualiza la URL con la de tu backend real
+# Redirección para la API
 [[redirects]]
   from = "/api/*"
-  to = "https://sigepa-backend.your-backend-service.com/api/:splat"
+  to = "/.netlify/functions/:splat"
   status = 200
-  force = true
-  headers = { Access-Control-Allow-Origin = "https://sigepa.netlify.app" }
 
 # Opciones de seguridad recomendadas
 [[headers]]
@@ -37,4 +48,4 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sigepa.netlify.app https://sigepa-backend.your-backend-service.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" 
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://sigepa.netlify.app; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;" 

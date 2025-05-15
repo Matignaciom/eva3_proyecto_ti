@@ -1,0 +1,97 @@
+/* Archivo para arreglar los textos blancos que no se ven */
+
+/* Reglas generales */
+body {
+  color: #333333 !important;
+  background-color: #f9fafb !important;
+}
+
+/* Corregir texto en contenedores del dashboard */
+.dashboardContainer {
+  color: #333333 !important;
+}
+
+.mainContent {
+  color: #333333 !important;
+  background-color: #f9fafb !important;
+}
+
+.card {
+  color: #333333 !important;
+  background-color: white !important;
+}
+
+.cardBody {
+  color: #333333 !important;
+}
+
+.cardHeader {
+  color: #333333 !important;
+}
+
+.cardTitle {
+  color: #1f2937 !important;
+}
+
+p, span, div {
+  color: #4b5563 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #1f2937 !important;
+}
+
+.welcomeMessage {
+  color: #333333 !important;
+  background-color: white !important;
+}
+
+.welcomeMessage h2 {
+  color: #1f2937 !important;
+}
+
+.welcomeMessage p {
+  color: #4b5563 !important;
+}
+
+/* Corrección para tablas y elementos con fondo blanco */
+table tbody tr td, table thead tr th {
+  color: #333333 !important;
+}
+
+/* Asegurar que los botones con fondo oscuro tengan texto claro */
+button.primaryButton, 
+button.cardAction, 
+.cardAction, 
+.primaryButton {
+  color: white !important;
+}
+
+/* Arreglar elementos específicos del dashboard */
+.navText {
+  color: white !important;
+}
+
+.sidebar a, .sidebar span {
+  color: white !important;
+}
+
+.contentArea {
+  color: #333333 !important;
+}
+
+/* Media queries override */
+@media (prefers-color-scheme: dark) {
+  body, .mainContent, .card, .cardBody, .welcomeMessage {
+    color: #333333 !important;
+    background-color: #f9fafb !important;
+  }
+  
+  p, span, div {
+    color: #4b5563 !important;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #1f2937 !important;
+  }
+} 

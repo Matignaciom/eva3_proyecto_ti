@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import RecuperarPassword from './pages/RecuperarPassword'
 import Dashboard from './pages/Dashboard/Dashboard'
+import CopropietarioDashboard from './pages/Dashboard/CopropietarioDashboard'
 import MapaGeoespacial from './pages/Dashboard/MapaGeoespacial'
 import MiParcela from './pages/Dashboard/MiParcela'
 import Pagos from './pages/Dashboard/Pagos'
@@ -16,6 +17,11 @@ import CrearAviso from './pages/Dashboard/CrearAviso'
 import AlertasPendientes from './pages/Dashboard/AlertasPendientes'
 import Layout from './components/Layout'
 import './App.css'
+import './ColorFixStyles.css'
+import './FixTextColors.css'
+import './MobileMenuFix.css'
+import './OverflowFix.css'
+import './CardFix.css'
 
 export default function App() {
   return (
@@ -28,9 +34,9 @@ export default function App() {
         <Route path="/recuperar" element={<Layout><RecuperarPassword /></Layout>} />
         
         {/* Rutas del dashboard */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard><CopropietarioDashboard /></Dashboard>} />
         <Route path="/dashboard/admin" element={<Dashboard userRole="Administrador" />} />
-        <Route path="/dashboard/copropietario" element={<Dashboard userRole="Copropietario" />} />
+        <Route path="/dashboard/copropietario" element={<Dashboard userRole="Copropietario"><CopropietarioDashboard /></Dashboard>} />
         
         {/* Rutas específicas del dashboard */}
         <Route path="/dashboard/mapa" element={<Dashboard><MapaGeoespacial /></Dashboard>} />
@@ -48,7 +54,7 @@ export default function App() {
         <Route path="/dashboard/alertas" element={<Dashboard><AlertasPendientes /></Dashboard>} />
         
         {/* Capturar todas las subrutas del dashboard */}
-        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route path="/dashboard/*" element={<Dashboard><CopropietarioDashboard /></Dashboard>} />
       </Routes>
     </Router>
   );

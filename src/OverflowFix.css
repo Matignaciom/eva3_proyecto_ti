@@ -1,0 +1,73 @@
+/* Solución para problemas de barras de desplazamiento duplicadas */
+
+/* Reglas generales para controlar el overflow */
+html, body {
+  overflow: hidden !important;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#root {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Contenedor principal debe manejar el overflow */
+.dashboardContainer {
+  overflow: hidden !important;
+  height: 100vh !important;
+  display: flex !important;
+}
+
+/* Sidebar con scroll vertical pero sin horizontal */
+.sidebar {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: 100vh !important;
+}
+
+/* Contenido principal con scroll vertical pero sin horizontal */
+.mainContent {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: 100vh !important;
+  padding-bottom: 2rem !important;
+}
+
+/* Árreas de contenido para tarjetas y elementos */
+.contentArea, .quickAccessGrid {
+  overflow: visible !important;
+}
+
+/* Asegurar que no se vea text "_mobileMenuToggle_yifzs_159" */
+[class*="mobileMenuToggle_"]:before,
+[class*="mobileMenuToggle_"]:after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Arreglo específico para remover texto no deseado */
+.dashboardContainer *:after,
+.dashboardContainer *:before {
+  content: normal !important;
+}
+
+/* Corregir cualquier texto que pueda aparecer como parte de clases CSS */
+.dashboardContainer [class*="_"] {
+  text-indent: -9999px !important;
+  font-size: 0 !important;
+}
+
+.dashboardContainer [class*="_"] > * {
+  text-indent: 0 !important;
+  font-size: inherit !important;
+}
+
+/* Asegúrate de que los botones y elementos interactivos son visibles */
+button, a, input, select, textarea {
+  text-indent: 0 !important;
+  font-size: inherit !important;
+} 

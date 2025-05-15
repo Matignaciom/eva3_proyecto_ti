@@ -1,48 +1,16 @@
 {
-  "name": "SIGEPA - Sistema de Gestión de Pagos",
+  "name": "SIGEPA - Sistema de Gestión de Parcelas",
   "short_name": "SIGEPA",
-  "description": "Sistema de gestión de pagos para comunidades y condominios",
+  "description": "Sistema de Gestión de Parcelas",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
-  "orientation": "portrait-primary",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "64x64",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.svg",
+      "src": "/vite.svg",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.png",
-      "sizes": "64x64",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
   ]
 } 

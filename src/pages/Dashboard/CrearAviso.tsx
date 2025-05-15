@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './PaginasComunes.module.css';
+import styles from './CrearAviso.module.css';
 
 // API URL base
 const API_BASE_URL = 'http://localhost:3000';

@@ -9,15 +9,17 @@ export default defineConfig({
     'process.env': {}
   },
   server: {
+    port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
+      '/.netlify/functions': {
+        target: 'http://localhost:9999',
         changeOrigin: true,
-        secure: false
+        secure: false,
       }
     }
   },
   build: {
+    outDir: 'dist',
     // Optimizaciones para producción
     minify: 'terser',
     terserOptions: {
@@ -28,11 +30,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // Separar el código en chunks para mejorar el caching
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@syncfusion/ej2-base', '@syncfusion/ej2-react-calendars', '@syncfusion/ej2-react-charts', '@syncfusion/ej2-react-grids'],
-        }
+        manualChunks: undefined
       }
     },
     // Generar prefetch para mejorar la velocidad de carga

@@ -1,0 +1,63 @@
+/* Arreglo para el botón de menú móvil */
+
+/* Forzar ocultamiento en cualquier elemento con "mobileMenuToggle" en su clase */
+button[class*="mobileMenuToggle"],
+div[class*="mobileMenuToggle"],
+span[class*="mobileMenuToggle"],
+a[class*="mobileMenuToggle"],
+[class*="mobileMenuToggle"] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  transform: scale(0) !important;
+  display: none !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+/* Mostrar solo en dispositivos móviles */
+@media (max-width: 768px) {
+  button[class*="mobileMenuToggle"],
+  div[class*="mobileMenuToggle"],
+  span[class*="mobileMenuToggle"],
+  a[class*="mobileMenuToggle"],
+  [class*="mobileMenuToggle"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+    z-index: 9999 !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 50% !important;
+    background-color: #4f46e5 !important;
+    color: white !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    pointer-events: auto !important;
+    transform: scale(1) !important;
+    overflow: visible !important;
+    clip: auto !important;
+  }
+
+  /* Ajuste para pantallas muy pequeñas */
+  @media (max-width: 480px) {
+    button[class*="mobileMenuToggle"],
+    div[class*="mobileMenuToggle"],
+    span[class*="mobileMenuToggle"],
+    a[class*="mobileMenuToggle"],
+    [class*="mobileMenuToggle"] {
+      bottom: 0.75rem !important;
+      right: 0.75rem !important;
+      width: 2.25rem !important;
+      height: 2.25rem !important;
+    }
+  }
+} 

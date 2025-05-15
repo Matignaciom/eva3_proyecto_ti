@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './PaginasComunes.module.css';
+import styles from './Resumen.module.css';
 import API_BASE_URL from '../../config/api.config';
 
 interface EstadisticasComunidad {
